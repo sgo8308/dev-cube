@@ -1,6 +1,6 @@
 # JVM 구조
 ### JVM 구조는 어떻게 이루어져 있을까?
-###JVM Stack이란?
+### JVM Stack이란?
     
     JVM Stack은 쓰레드마다 할당된 Stack 자료 구조를 갖는 공간이다.
     
