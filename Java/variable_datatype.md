@@ -64,8 +64,12 @@
     대신에 String을 참조자료형으로 만든다면 언제나 실제 값의 주소만을 갖기 때문에,
     아무리 실제 값이 커지더라도 다시 그 데이터에 주소만 저장하면 되므로 문제가 없다.
     
-### String은 왜 immutable할까?
-    1. 보안
+### String은 왜 immutable할까? ★
+    1. 동시성 문제 해결
+
+        불변하기 때문에 멀티쓰레드 프로그래밍시 발생할 수 있는 동시성 문제를 해결할 수 있다.
+
+    2. 보안
         
         String은 주로 중요한 정보에 많이 쓰인다.
         
@@ -79,17 +83,23 @@
         
         하지만 String이 immutable하다면, 우리는 securiy check가 끝나면 안심하고 이 String을 다룰 수 있다.
         
-    2. 성능
+    3. 성능
         
         자바에서 String은 String pool에 저장된다. 동일한 String을 사용하는 변수들이 String pool에 있는 하나의 데이터를 가르키게 하여 메모리를 절약한다.
         
         이 때 String이 mutable하다면 String이 변경됐을 때 이 String을 가르키는 모든 변수가 원치않는 변화로 피해를 입을 것이다.
         
+        (여기서 말하는 변화는 String a = "a"한 후 a = "b"와 같이 단순히 a가 다른 값으로 할당되는 것을 말하는 것은 아니다.
+        이 경우에는 어차피 a가 다른 주소를 가르키게 되는 것이니 String이 mutable하더라도 상관없다.
+        여기서 말하는 변화는 a.toUpperCase()와 같이 이 값에 직접적으로 변화를 주는 것을 말한다.)
+
         즉 String pool이라는 기능이 가능한 것은 String이 immutable하기 때문이다.
         
         또한 String은 HashMap이나 HashSet의 자료 구조에서 key로 많이 쓰이게 된다.
         
-        String이 immutable하기 때문에 String constant pool에 있는 String들은 한 번 hashCode()가 호출되면 그 값을 캐싱하고 있다가 다시 한 번 호출될 때는 caching한 값을 반환하기 때문에 자료구조에서 데이터를 찾을 때마다 haschCode()의 연산 과정이 필요없어서 성능상 이점을 준다.
+        String이 immutable하기 때문에 String constant pool에 있는 String들은 
+        한 번 hashCode()가 호출되면 그 값을 캐싱하고 있다가 다시 한 번 호출될 때는 caching한 값을 반환하기 때문에 
+        자료구조에서 데이터를 찾을 때마다 haschCode()의 연산 과정이 필요없어서 성능상 이점을 준다.
         
 ### String a = “hello” 와 String a = new String(”hello”) 의 차이는 뭘까?
     
