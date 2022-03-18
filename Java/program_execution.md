@@ -117,3 +117,14 @@
     [https://www.slideshare.net/jongyoungpark2/java-class-file-format](https://www.slideshare.net/jongyoungpark2/java-class-file-format)
     위키피디아 : 컴파일러
     [https://bradbury.tistory.com/226](https://bradbury.tistory.com/226)
+
+### 자바는 컴파일 언어일까 인터프리터 언어일까? ★
+    
+    둘이 섞여있다.
+    
+    기본적으로 자바 프로그램은 자바 실행 엔진에서 인터프리터가 바이트코드를 기계어로 한 줄 한 줄 번역하며 실행된다. 
+    따라서 인터프리터 언어라고 할 수 있다.
+    
+    한 편, 자바 프로그램을 바이트 코드로 만들 때와
+    jvm 실행엔진 안에 JIT 컴파일러가 바이트코드를 기계어로 변환할 때는 
+    컴파일이 쓰이므로 컴파일 언어라고 할 수 있다.
