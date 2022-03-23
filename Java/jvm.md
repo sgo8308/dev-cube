@@ -158,6 +158,17 @@
     a는 오브젝트의 레퍼런스, i는 int, l은 long, f는 float, d는 double이다.
     
     즉 iload는 int값을 Operand Stack에 쌓는다는 의미이다. 
+### invokevirtual은 무슨뜻일까?
+    
+    c++에서 어떤 메소드가 오버라이드되려면 virtual로 선언되어야 한다.
+    
+    자바는 이 부분에서 영감을 얻은 것 같다.
+    
+    자바는 기본적으로 static과 final 메소드를 제외한 모든 메소드가 오버라이딩 가능하니 기본적으로 virtual 메소드인 셈이다.
+    
+    ---
+    
+    [https://dzone.com/articles/how-does-jvm-handle-polymorphism-method-overloadin](https://dzone.com/articles/how-does-jvm-handle-polymorphism-method-overloadin)
 
 # 성능 튜닝
 ### JVM의 성능 튜닝은 주로 어떤 부분에서 일어날까?

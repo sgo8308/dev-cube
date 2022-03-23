@@ -73,17 +73,16 @@
     
     ---
     
-    [https://docs.oracle.com/javase/tutorial/essential/exceptions/finally.html](https://docs.oracle.com/javase/tutorial/essential/exceptions/finally.html)
+    [https://docs.oracle.com/javase/tutorial/essential/exceptions/finally.html]
     
 ### finally문은 언제 실행될까?
     1. try문에서 예외가 발생하지 않았을 때
     2. try문에서 예외가 발생하고 catch문으로 처리한 후
-    3. try문에서 예외가 발생했지만 catch문에서 핸들링하지 못하는 예외일 경우
-    finally구문이 모두 실행되고 이 예외를 밖으로 던진다.
+    3. try문에서 예외가 발생했지만 catch문에서 핸들링하지 못하는 예외일 경우 finally구문이 모두 실행되고 이 예외를 밖으로 던진다.
     
     ---
     
-    [https://blog.jamesdbloom.com/JavaCodeToByteCode_PartOne.html#while_loop](https://blog.jamesdbloom.com/JavaCodeToByteCode_PartOne.html#while_loop)
+    [https://blog.jamesdbloom.com/JavaCodeToByteCode_PartOne.html#while_loop]
     
 ### catch문 안에서 다시 한 번 예외가 발생한 것도 같은 지금 있는 catch문으로 잡힐까?
     

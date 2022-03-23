@@ -71,3 +71,21 @@
     byte + short → int + int
     
     왜냐하면 byte와 short의 표현 범위가 좁아서 연산중에 오버플로우가 발생할 가능성이 높기 때문이다.
+
+    ```
+### 타입 프로모션과 타입 캐스팅은 무엇일까? ★
+    
+    타입 프로모션은 Widening Conversion이며, 타입 캐스팅은 Widening Conversiong , Narrowing Conversion 둘다 가능하지만
+    주로 Narrowing Conversion으로 주로 쓰이기 때문에 Narrowing Conversion이라고 불리는 것 같다.
+    
+    타입 프로모션은 컴파일러에 의해 암묵적으로 일어나지만, 타입 캐스팅은 명시적으로 프로그래머가 캐스팅 오퍼레이터를 사용함으로써 일어난다.
+    
+    타입 프로모션은 데이터를 잃지 않지만, 타입 캐스팅은 데이터를 잃는다(Narrowing 일 때).
+    
+    ---
+    
+    [https://docs.oracle.com/javase/specs/jls/se7/html/jls-15.html#jls-15.16](https://docs.oracle.com/javase/specs/jls/se7/html/jls-15.html#jls-15.16)
+    
+    [https://www.geeksforgeeks.org/difference-between-type-casting-and-type-conversion/](https://www.geeksforgeeks.org/difference-between-type-casting-and-type-conversion/)
+    
+    [https://www.examtray.com/java/last-minute-java-type-casting-or-type-conversion-or-type-promotions-tutorial](https://www.examtray.com/java/last-minute-java-type-casting-or-type-conversion-or-type-promotions-tutorial)
