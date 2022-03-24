@@ -119,5 +119,20 @@
         ---
         
         [https://en.wikipedia.org/wiki/Object_copying](https://en.wikipedia.org/wiki/Object_copying)
-        
-### 왜 clone()과 finalize()는 기초 단계에서 모르고 있는 것이 안전할까?
+
+### clone()을 사용 하면 안 좋을까?
+
+
+    배열의 복사를 위해서라면 clone()을 쓰는 것이 좋지만,객체의 복사를 위해서라면 clone()보다는 복사 생성자나 복사 팩토리 방식을 쓰는 것이 좋다.
+
+    왜냐하면 객체 안에 가변 객체가 포함된다면 가변 객체에 대한 복사작업을 다시 구현해주어야 하고
+    CloneNotSupportedException 처리와 같은 부분이 없어서 깔끔하게 복사할 수 있다.
+
+    또한 ArrayList에서 LinkedList로 복사하는 등 더 유연하게 복사 가능하다.
+
+    ---
+
+    [https://www.artima.com/articles/josh-bloch-on-design#part13](https://www.artima.com/articles/josh-bloch-on-design#part13) - Copy Constructor versus Cloning 파트
+
+    [https://it-mesung.tistory.com/190](https://it-mesung.tistory.com/190)
+
