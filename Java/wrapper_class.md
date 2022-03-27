@@ -9,10 +9,7 @@
 ### 기본 자료형이 있는데 wrapper class가 필요하는 이유는 뭘까?
     
     기본형 값들을 객체로 저장해야 할 때(ArrayList<Integer>) 필요하다.
-    
-    매개변수로 넘어온 기본 자료형을 수정하고 싶을 때 사용한다.
-    (기본 자료형은 passed by value 방식이기 때문에 수정이 원본 자료에 수정이 불가능하다.)
-    
+   
     java.util package가 오브젝트들을 다루는 유틸리티 클래스를 제공하기 때문에 이들 클래스들을 기본 자료형에 사용하려면 wrapper class가 필요하다.
     
     ---
@@ -85,3 +82,37 @@
     ---
     
     남궁 성, 자바의 정석 3rd Edition, 1판 2쇄, 도우출판, 495p, 2016
+
+### primitive type과 wrapper type을 같이 연산하면 안 좋은 이유는 뭘까?
+    
+    예를 들어 다음과 같은 코드가 있을 때
+    
+    public static void main(String[] args) {
+      Long sum = 0L;
+      for (long i = 0; i < 1000000; i++) {
+      	sum += i;
+      }
+    }
+    
+    실제 연산 과정은 먼저 sum이 primitive type인 long으로 형변환되는 언박싱이 이루어진다.
+    
+    이후 i와 더한 후 이 값이 다시 Long으로 형변환되는 박싱이 이루어지고 sum에 할당이 된다.
+    
+    이런 식으로 불필요한 과정이 연산에 추가가 되므로 성능이 느려질 수 밖에 없다.  
+    
+    또한 1~ 100만까지의 Long 객체가 힙 메모리에 생기게 되므로 가비지 컬렉팅을 유발하여 성능이 느려진다.
+    
+    실제로 다음과 같은 코드과 비교했을 때 성능이 5배 정도 느리다.
+    
+    public static void main(String[] args) {
+        long sum = 0L;
+        for (long i = 0; i < 1000000; i++) {
+            sum += i;
+        }
+    }
+    
+    ---
+    
+    [https://sas-study.tistory.com/407](https://sas-study.tistory.com/407)
+    
+    [https://medium.com/@bpnorlander/java-understanding-primitive-types-and-wrapper-objects-a6798fb2afe9](https://medium.com/@bpnorlander/java-understanding-primitive-types-and-wrapper-objects-a6798fb2afe9)
