@@ -101,7 +101,35 @@
 류길현 외 2명 , JVM Performance Optimizing 및 성능분석사례, 초판 1쇄, 엑셈, 21p,2017
     
 류길현 외 2명 , JVM Performance Optimizing 및 성능분석사례, 초판 1쇄, 엑셈, 125p ,2017
+ ### PermGen은 왜 없어졌을까? ★
     
+    JRockit JVM과 Hotspot JVM에 합치는 노력의 일환이다. JRockit은 PermGen이 존재하지 않아 관리가 필요없기 때문이다.
+    
+    또한 PermGen은 JVM에 의해 크기가 강제되던 영역으로 Perm 영역 크기로 인한 OutOfMemoryError가 자주 일어났다.
+    
+    이러한 이유로 JDK 8부터는 PermGen이 삭제되고 대신 Metaspace 영역이 추가되었다.
+    
+    Metaspace는 Native memory 영역으로 , OS가 자동으로 크기를 조절하고 기존 Perm영역의 최대 사이즈보다 훨씬 큰 사이즈를 갖는다.
+    
+    ---
+    
+    [https://johngrib.github.io/wiki/java8-why-permgen-removed/]
+    
+    [https://openjdk.java.net/jeps/122]
+    
+    - JRockit이란?
+        
+        WebLogic이라는 WAS의 성능 최적화를 위해서 만들어진 JDK이다.
+        
+        이 JDK를 만든 회사가 Oracle에 넘어갔기 때문에 Oracle은 Oracle JDK와 JRockit JDK 2개를 제공하는 셈이다.
+        
+        현재는 Oracle JDK에 합쳐진 듯 하다.
+        
+        ---
+        
+        이상민, 자바의 신, 2판 1쇄, 로드북, 537p, 2017
+        
+        [https://stackoverflow.com/questions/23578099/where-to-download-jrockit-for-java-7]
 ### MetaSpace란?
     
     자바 8부터 Permanent Generation을 대체한 영역이다.
@@ -135,7 +163,26 @@
 참조 문헌
     
 - 웹 문서 [https://www.oracle.com/webfolder/technetwork/tutorials/mooc/JVM_Troubleshooting/week1/lesson1.pdf](https://www.oracle.com/webfolder/technetwork/tutorials/mooc/JVM_Troubleshooting/week1/lesson1.pdf), 32p
-
+### 왜 heap은 Generation 구조로 만들었을까?
+    
+    모든 객체가 쓰레기인지 검사하는 무식한 방식의 가비지 컬렉션은 규모가 큰 프로그램에서 심각한 문제가 생길 수 있다.
+    
+    JVM GC 설계자들은 경험적으로 대부분의 객체가 생겨나자마자 쓰레기가 된다는 것을 알고 있었다. (이것을 '약한 세대 가설(weak generational hypothesis)'이라 부른다.)
+    
+    따라서 매번 전체를 검사하지 않고 일부만 검사할 수 있도록 generational한 구조를 고안해 낸 것이다.
+    
+    이러한 방식 속에서 대부분의 객체는 Young Generation에서 죽게 된다.
+    
+    ---
+    
+    [https://johngrib.github.io/wiki/jvm-memory/]
+    
+### 왜 jvm spec은 Metaspace나 PermGen에 대한 설명이 전혀 없을까?
+    
+    Metaspace나 PermGen은 hotspot jvm의 세부 구현 사항이기 때문이다.
+    
+    ---
+    (https://stackoverflow.com/questions/49371219/why-oracle-specification-does-not-tell-anything-about-metaspace)
 # JVM Instruction Set
 
 ### JVM Instruction Set은 뭘까?
