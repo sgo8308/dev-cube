@@ -228,3 +228,42 @@
 참조 문헌
     
 - 웹 문서 [https://www.oracle.com/webfolder/technetwork/tutorials/obe/java/gc01/index.html](https://www.oracle.com/webfolder/technetwork/tutorials/obe/java/gc01/index.html)
+### 성능에 대한 주요 척도는 Throughput과 Responsiveness인데 둘을 무엇을 의미할까?
+    - Throughput
+        
+        Throughput은 처리량이라는 의미로 얼마나 많은 양의 일을 특정한 기간동안 하느냐이다.
+        
+        예를 들어 이런 것이다.
+        
+        주어진 시간동안 완료된 트랜잭션 갯수
+        
+        배치프로그램이 한시간안에 완요할 수 있는 일의 갯수
+        
+        한시간안에 완료될 수 잇는 쿼리의 갯수
+        
+        긴 시간의 pause time은 throughput에 집중하는 앱에는 받아들여질만 하다.
+        왜냐하면 이런 어플리케이션은 긴 기간 동안의 벤치마크에 집중하기 때문이다.
+        빠른 반응 속도는 고려 대상이 아니다.
+        
+        이런 앱들은 Serial GC나 Parellel GC를 이용하는 것이 좋다.
+        
+    - Responsiveness
+        
+        얼마나 빨리 애플리케이션이나 시스템이 특정한 요청에 반응하는가이다.
+        
+        예를 들면 이런 것이다.
+        
+        얼마나 빨리 데스크탑 UI가 이벤트에 반응하는가
+        
+        얼마나 빨리 웹사이트가 페이지를 리턴하는가
+        
+        얼마나 빨리 쿼리가 리턴되는가
+        
+        Responsiveness에 집중하는 애플리케이션에게 긴 시간의 pause타임은 용납이 안된다.
+        
+        이런 앱들은 Concurrent GC들을 이용하는게 좋다.
+        
+        
+        ---
+        
+        [https://www.oracle.com/webfolder/technetwork/tutorials/obe/java/gc01/index.html]
