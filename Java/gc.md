@@ -14,6 +14,28 @@
     [https://docs.oracle.com/en/java/javase/18/gctuning/available-collectors.html#GUID-F215A508-9E58-40B4-90A5-74E29BF3BD3C](https://docs.oracle.com/en/java/javase/18/gctuning/available-collectors.html#GUID-F215A508-9E58-40B4-90A5-74E29BF3BD3C)
     
     [https://docs.oracle.com/javase/8/docs/technotes/guides/vm/gctuning/collectors.html#sthref27](https://docs.oracle.com/javase/8/docs/technotes/guides/vm/gctuning/collectors.html#sthref27)
+### GC의 선택이 중요한 이유는 무엇일까?
+    
+    작은 시스템에서 무시될만한 throughput issue가 거대한 시스템에서는 매우 주요한 bottleneck으로 작용할 수 있다.
+    
+    이 때 그런 bottlenect을 해소할 수 있는 작은 개선이 큰 성능 향상을 이끌어낼 수 있기 때문에 이런 것을 도와줄 수 있는 가비지 컬렉터의 선택이나 튜닝이 중요하다.
+    
+    또한 애플리케이션마다 원하는 GC의 성능이 다르기 때문이다.(높은 throughput 또는 높은 responsiveness)
+    
+    ---
+    
+    [https://docs.oracle.com/en/java/javase/18/gctuning/introduction-garbage-collection-tuning.html#GUID-A48F272E-A6C1-45A0-9A8B-6D5790EB454C](https://docs.oracle.com/en/java/javase/18/gctuning/introduction-garbage-collection-tuning.html#GUID-A48F272E-A6C1-45A0-9A8B-6D5790EB454C)
+    
+### GC 선택과 튜닝, 실무에서도 많이 할까?
+    
+    옛날 같은 경우 이런 것이 많이 중요했다.
+    
+    하지만 최근에는 대부분 G1GC를 사용하는 상황이고, G1GC는 튜닝할 여지가 많지 않다.
+    
+    ---
+    
+    멘토님
+
 ### Reachable Object는 어떻게 판별할까?
     
     Root로 부터 어떤 식으로든 Reference 관계가 있다면 Reachable Object라고 한다.
@@ -41,6 +63,38 @@
         ---
         
         [https://www.baeldung.com/java-gc-roots](https://www.baeldung.com/java-gc-roots)
+### 어떻게 Young 영역만 Marking할 수 있을까?
+    
+    GC Root로부터 객체 그래프 탐색시 Old Geration의 객체를 만나면 탐색을 중단한다.
+    
+    Old 영역과 Young 영역의 구분은 두 영역이 물리적으로 나뉘어져 있기 때문에 주소만 가지고 판단이 가능하다.
+    
+    이렇게 됐을 때 Young 영역의 객체만 Marking할 수 있다.
+    
+    한 편 Old 객체로부터만 참조되는 Young 객체가 있을 수 있다.
+    
+    이 객체는 Marking 단계에서 Old 객체를 만나면 더 이상 진행하지 않기 때문에 Marking이 되지 않아 Garbage로 취급된다.
+    
+    이것을 보완하기 위해 Card Table이란 것이 존재하며 이 Card Table을 통해 Old 객체가 Young 객체를 참조하는 것을 Old 영역 전체를 뒤지지 않고서도 알 수 있다.
+    
+    ---
+    
+    [https://stackoverflow.com/questions/26280684/garbage-collection-young-generation-scanning](https://stackoverflow.com/questions/26280684/garbage-collection-young-generation-scanning)
+    
+### 왜 Young 영역과 Old 영역을 나누었을까?
+    
+    ‘약한 세대 가설’에 따라 최대한 효과적으로 가비지 콜렉팅을 진행하기 위해서다.
+    
+    약한 세대별 가설 중 첫번째는 ‘거의 대부분의 객체는 아주 짧은 시간만 살아 있지만, 나머지 객체는 기대 수명이 훨씬 길다’이다.
+    
+    즉 가비지를 수집하는 힙은, 단명 객체를 쉽고 빠르게 수집할 수 있게 설계해야 하며, 장수 객체와 단명 객체를 완전히 떼어놓는게 가장 좋다는 결론이 내려진다.
+    
+    이러한 이유로 young 영역과 old 영역이 구분된 것이다.
+    
+    한 편 이렇게 나눈들 결국 Young 영역에 있는 살아있는 객체를 판별하려면 Old 영역까지 모두 다 뒤져야 하지 않나라고 생각할 수 있는데, 이 부분은 ‘늙은 객체가 젊은 객체를 참조할 일은 거의 없다’라고 하는 ‘약한 세대 가설’의 두번째 포인트가 보완해준다.
+    
+    하지만 그럼에도 불구하고 Old 영역에서 참조가 아예 없는 것은 아닌데 이건 어떡하지라고 생각한다면, 그것은 Card Table이 보완해준다.
+
 ### GC 과정에서 발생하는 stop the world라는 것은 무엇일까?
 
 
@@ -53,6 +107,13 @@
     [https://d2.naver.com/helloworld/1329](https://d2.naver.com/helloworld/1329)
 
 ### 왜 GC는 stop the world가 필요할까?
+    가바지 컬렉션 과정과 동시에 오브젝트에 변화가 생기면 무언가 문제가 생길 여지가 있기 때문에 안정적으로 가비지 컬렉팅을 진행하기 위해서
+
+    Compaction 과정에서 객체들의 주소가 변하는데 이 때 애플리케이션이 계속 동작하면 문제가 생길수 있어서 
+
+    ---
+
+    [https://www.oracle.com/technetwork/java/javase/memorymanagement-whitepaper-150215.pdf]
 ### GC 성능에 대한 주요 척도는 Throughput과 Latency인데 둘을 무엇을 의미할까?
     - Throughput
         
@@ -214,35 +275,87 @@
         
         ---
         
-         류길현 외 2명 , JVM Performance Optimizing 및 성능분석사례, 초판 1쇄, 엑셈, 42p,2017   
+        류길현 외 2명 , JVM Performance Optimizing 및 성능분석사례, 초판 1쇄, 엑셈, 42p,2017   
         어플리케이션에 쓰일 processor resource가 GC에 사용되기 때문에 어플리케이션의 성능이 떨어진다.
+
+    - CMF란 무엇일까?
     
-### G1GC - Garbage-First Garbage Collector란?
- ### G1GC란?
+    Concurrent mode failure의 줄임말로 동시 모드 실패라는 뜻이다.
     
-    서버스타일의 가비지 컬렉터로 큰 메모리를 가진 멀티프로세서 머신에 특화되어 있다. 
+    승격된 객체가 들어갈 공간이 없는 경우에 CMF라고 부른다.
     
-    이전 컬렉터들이 낮은 pause time과 높은 throughput 둘 중 하나를 포기할 수 밖에 없었다. G1GC는 pause time을 줄임과 동시에 high throughput을 내면서 CMS GC를 대체할 목적으로 만들어졌다.
+    예를 들어 Old GC 수행 도중 Minor GC가 발생하여 Old 영역에 공간이 부족해지거나, 단편화로 인해서 더 이상 객체를 끼워 넣을 공간이 부족한 경우 등이 있다.
     
-    다른 GC들과 달리 Heap의 물리적 Generation 구분을 없애고 전체 Heap을 1Mbytes 단위 Region으로 재편한다.
+    이 때는 어쩔 수 없이 ParallelOld GC 방식을 쓸 수 밖에 없는데 이 때 긴 Stop the world가 진행되므로 짧은 pause time을 유지해야 하는 CMS에는 치명적이다.
     
-    각각은 논리적으로 Eden 영역, Survivor 영역, Old 영역과 Humongous 영역이라고 하는 거대한 오브젝트들을 담는 영역으로 나뉜다.
-    
-    Garbage First라고 불리는 이유는 이렇게 나누어진 Rigion 중 Garbage 비율이 많은 Region부터 Collection을 시작하기 때문이다.
+    따라서 이 CMF가 발생하지 않도록 잘 튜닝해야 한다.
     
     ---
     
-    [https://docs.oracle.com/javase/8/docs/technotes/guides/vm/gctuning/g1_gc.html#garbage_first_garbage_collection](https://docs.oracle.com/javase/8/docs/technotes/guides/vm/gctuning/g1_gc.html#garbage_first_garbage_collection)
-    
-    류길현 외 2명 , JVM Performance Optimizing 및 성능분석사례, 초판 1쇄, 엑셈, 49p,2017
-    
-### G1GC의 동작 방식은?
-    - Young GC - stop the world , pararell
+    벤저민 J. 에번스 외 2명, 자바 최적화, 이일웅, 초판 1쇄, 한빛미디어, 199- 200, 2019
+### G1GC - Garbage-First Garbage Collector
+    - G1GC란?
         
-        이전 컬렉터들과 마찬가지로 Eden 영역에 객체가 꽉차거나 Survivor 영역이 일정 크기 이상 차게 되면 Young GC가 일어난다.
+        서버스타일의 가비지 컬렉터로 큰 메모리를 가진 멀티프로세서 머신에 특화되어 있다. 
         
-        살아남은 객체들은 다른 Survivor 구역으로 이동하거나 Survivor 구역이 꽉 차면 새로운 구역으로 이동하는데 이렇게 이동된 구역은 새로운 Survivor 영역이 된다.
+        이전 컬렉터들이 낮은 pause time과 높은 throughput 둘 중 하나를 포기할 수 밖에 없었다.
+        G1GC는 pause time을 줄임과 동시에 high throughput을 내면서 CMS GC를 대체할 목적으로 만들어졌다.
         
-        객체들은 이동하면서 age를 먹게 되고 age가 threshold를 넘은 객체는 Old 영역으로 승격된다.
+        다른 GC들과 달리 Heap의 물리적 Generation 구분을 없애고 전체 Heap을 1Mbytes 단위 Region으로 재편한다.
         
-    - 
+        각각은 논리적으로 Eden 영역, Survivor 영역, Old 영역과 Humongous 영역이라고 하는 거대한 오브젝트들을 담는 영역 설정된 비율에 따라 나뉜다.
+        
+        Garbage First라고 불리는 이유는 이렇게 나누어진 Rigion 중 Garbage 비율이 많은 Region부터 Collection을 시작하기 때문이다.
+        
+        CMS 같은 경우 긴 pause time을 유발하는 Compacting을 할 수 없어 단편화 문제가 발생하고,
+        이 단편화 문제는 추후 CMF를 일으켜 예기치 못한 긴 pause time이 발생하게 되는 문제가 있었다.
+        
+        그러나 G1GC는 Region 단위로 가비지 컬렉팅을 진행하고 가장 가비지 비율이 높은 region부터 목표 pause time 안에 끝낼 수 있는 만큼 
+        가비지 컬렉팅을 진행하기 때문에 짧은 pasue time으로도 조금씩 Compacting 작업이 진행 가능하다.
+        
+        따라서 CMF 현상이 잘 일어나지 않으며 상당히 높은 확률로 목표한 pause time을 지킬 수 있다.
+        
+        ---
+        
+        [https://docs.oracle.com/javase/8/docs/technotes/guides/vm/gctuning/g1_gc.html#garbage_first_garbage_collection](https://docs.oracle.com/javase/8/docs/technotes/guides/vm/gctuning/g1_gc.html#garbage_first_garbage_collection)
+        
+        류길현 외 2명 , JVM Performance Optimizing 및 성능분석사례, 초판 1쇄, 엑셈, 49p,2017
+        
+        [https://www.oracle.com/technetwork/tutorials/tutorials-1876574.html](https://www.oracle.com/technetwork/tutorials/tutorials-1876574.html)
+        
+        벤저민 J. 에번스 외 2명, 자바 최적화, 이일웅, 초판 1쇄, 한빛미디어, 199-200, 2019
+        
+    - G1GC의 동작 방식은?
+        - Young GC - stop the world , pararell
+            
+            Eden 영역에 객체가 꽉차면 Young GC가 일어난다.
+            
+            이 때 eden 영역과 survivor 영역에서 살아남은 객체들은 새로운 영역들로 이동하고 이 영역들은 새로운 Survivor 영역이된다.
+            
+            만약 Survivor 영역이 부족하면 어떤 객체는 바로 Old 영역으로 승격되기 도한다.
+            
+            객체들은 이동하면서 age를 먹게 되고 age가 threshold를 넘은 객체는 Old 영역으로 승격된다.
+
+        - Old Generation Collection
+            
+            
+        
+        만약 이러한 과정 중에 메모리가 모두 꽉차게 되면 다른 컬렉터와 같은 Full GC를 수행하게 된다.
+        
+        ---
+        
+        [https://www.oracle.com/technetwork/tutorials/tutorials-1876574.html](https://www.oracle.com/technetwork/tutorials/tutorials-1876574.html)
+        
+        이상민, 자바 성능 튜닝 이야기, 초판 4쇄, 인사이트, 339p, 2019
+        
+        [https://docs.oracle.com/en/java/javase/18/gctuning/garbage-first-g1-garbage-collector1.html#GUID-F1BE86FA-3EDC-4D4F-BDB4-4B044AD83180](https://docs.oracle.com/en/java/javase/18/gctuning/garbage-first-g1-garbage-collector1.html#GUID-F1BE86FA-3EDC-4D4F-BDB4-4B044AD83180)
+        
+        [https://www.codetd.com/en/article/12528439](https://www.codetd.com/en/article/12528439)
+        
+    - G1GC의 가장 중요한 장점은? 다른 애들보다 나은 점은? ★
+        
+        영역을 잘게 나누어서 처리한다는 점이 가장 중요
+        
+        큰 방은 가끔 치우는 것보다 작은 방을 자주 치우는 느낌
+        
+        이 부분과 장점을 엮어서 생각해보자
