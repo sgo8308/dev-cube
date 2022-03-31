@@ -14,6 +14,63 @@
 - 웹 문서
     
     [https://www.oracle.com/webfolder/technetwork/tutorials/obe/java/gc01/index.html](https://www.oracle.com/webfolder/technetwork/tutorials/obe/java/gc01/index.html)
+### 클래스로더는 무엇일까?
+    
+    클래스 로딩에 책임이 있는 객체다.
+    
+    ---
+    
+    Java 11 API Document - ClassLoader class
+    
+### 클래스로딩 과정은?
+    
+    Loading → Linking → Initializing의 3단계로 구성되어 있다. 
+    
+    - loading
+        
+        클래스를 한 번에 로딩하지 않고 애플리케이션에 의해서 필요할 때 클래스 이름을 통해 파일 시스템으로부터 class file을 찾아서 java.lang 해키지의 Class 클래스의 객체를 생성한다.
+
+    - linking 
+    
+        링크 작업이 수행된다. 이 단계에서 static 필드를 생성 및 초기화하고 메서드 테이블을 할당한다.
+
+    - initializing
+
+        클래스가 초기화된다.
+    
+    ---
+    
+    이상민, 자바 성능 튜닝 이야기, 초판 4쇄, 인사이트, 314p, 2019
+    
+### 클래스 언로딩이란?
+    
+    클래스를 로딩한 클래스로더 객체가 GC되면 클래스도 언로드된다.
+    
+    클래스로더는 이를 위해 다음과 같이 자신이 로드 한 클래스 객체의 리스트를 가지고 있다.(참조를 유지해서  클래스가 GC되는 것을 방지)
+    
+    // The classes loaded by this class loader. The only purpose of this table
+    // is to keep the classes from being GC'ed until the loader is GC'ed.
+    private final Vector<Class<?>> classes = new Vector<>();
+    
+    ---
+    
+    Java 11 API Document - ClassLoader class
+    
+### 클래스로더도 클래스인데 그럼 이 클래스로더는 누가 로딩할까?
+    
+    부트스트랩 클래스로더가 담당한다.
+    
+    이 클래스로더는 JVM 코어에 한 파트이고 native code로 쓰여져 있다.
+    
+    ---
+    
+    [https://www.baeldung.com/java-classloaders](https://www.baeldung.com/java-classloaders)
+    
+### Runtime Constatnt pool은 무엇일까?
+    
+    상수와 메소드와 필드에 대한 참조가 들어 있는 클래스마다 존재하는 테이블이다.
+
+
 ### JVM Stack이란?
     
     JVM Stack은 쓰레드마다 할당된 Stack 자료 구조를 갖는 공간이다.

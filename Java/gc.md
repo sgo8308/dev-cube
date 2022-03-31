@@ -324,8 +324,63 @@
         [https://www.oracle.com/technetwork/tutorials/tutorials-1876574.html](https://www.oracle.com/technetwork/tutorials/tutorials-1876574.html)
         
         벤저민 J. 에번스 외 2명, 자바 최적화, 이일웅, 초판 1쇄, 한빛미디어, 199-200, 2019
-        
+
+    - G1GC는 언제 사용하면 좋을까?
+
+        - Can operate concurrently with applications threads like the CMS collector.
+        - Compact free space without lengthy GC induced pause times.
+        - Need more predictable GC pause durations.
+        - Do not want to sacrifice a lot of throughput performance.
+        - Do not require a much larger Java heap.
+    
+    ---
+    
+    [https://www.oracle.com/technetwork/tutorials/tutorials-1876574.html](https://www.oracle.com/technetwork/tutorials/tutorials-1876574.html)    
+
+    - G1GC는 어떻게 다른 애들을 제치고 default GC가 되었을까?
+    
+    일반적으로 GC의 pause time을 줄이는 것이 throughput을 최대화하는 것보다 중요하다.
+    
+    throughput을 최대화하는게 목적인 Parallel GC보다 낮은 pause time을 갖는 G1GC가 더 default GC가 되기에 알맞다.
+    
+    CMS 또한 낮은 pause time을 갖지만 CMF 같은 문제가 많기 때문에,
+    보다 예측 가능한 G1GC가 더 낫다.
+    
+    ---
+    
+    [http://openjdk.java.net/jeps/248](http://openjdk.java.net/jeps/248)
+    
+    - Remembered Set과 Collection Set이란?
+        - Remembered Set
+            
+            Region마다 갖고 있는, 이 Region 밖에서 이 Region 안에 있는 객체를 참조하는 위치들의 집합이다.
+            
+            이 Remembered Set을 이용하여 GC시 다른 모든 Region을 탐색하지 않고 효율적인 Marking이 가능하다.
+            
+        - Collection Set
+            
+            Collection Set은 가비지 컬렉터에 의해서 회수될 Region의 집합이다.
+            
+            Young-Only phase에서는 young gereration region과 humongous region들이 있을 수 있고, Space-Reclamation phase에는 여기에 더하여 몇몇 old genertion region이 포함 될 수 있다.
+            
     - G1GC의 동작 방식은?
+        
+        G1GC는 Young GC와 Old GC의 뚜렷한 구분이 없다.
+        
+        G1GC의 Garbage Collection은 Young-only Phase와 Space Reclamation의 두 단계로 나뉜다.
+        
+        Young-only Phase에서는 Young GC가 계속 수행되면서 Young 객체는 Survivor 영역으로 옮겨지기도 하고 Old 영역으로 Promotion되기도 한다.
+        
+        한 편 Young-only Phase에서 Old area의 occupancy가 특정 threshold를 넘어가기 시작하면 Old Area의 GC가 시작된다.
+        
+        Old GC가 Concurrent Start와 Remark Cleanup 과정을 거치면 Space Reclamation 단계로 넘어간다.
+        
+        이 단계에서는 Old Area의 Region의 영역들이 회수되며 이 때도 Young GC는 계속 진행되기 때문에 Young 객체들도 같이 회수된다.
+        
+        G1GC는 더 이상의 컬렉션이 노력만큼 많은 free space를 만들어내지 못한다고 판단되면 이 단계를 종료한다.
+        
+        그리고 다시 Young-phase가 시작되는 사이클이 계속 반복되는데, 만약 이러한 과정 중에 메모리가 모두 꽉차게 되면 다른 컬렉터와 같은 Full GC를 수행하게 된다.
+        
         - Young GC - stop the world , pararell
             
             Eden 영역에 객체가 꽉차면 Young GC가 일어난다.
@@ -335,12 +390,38 @@
             만약 Survivor 영역이 부족하면 어떤 객체는 바로 Old 영역으로 승격되기 도한다.
             
             객체들은 이동하면서 age를 먹게 되고 age가 threshold를 넘은 객체는 Old 영역으로 승격된다.
-
+            
+            - YGC할 때 전체 Old Region을 스캔해야 할까?
+                
+                아니다.
+                
+                G1GC에서는 각각의 영역당 Rset이라는 것이 존재한다.
+                
+                그리고 이 Rset에는 Old Region으로부터 Young Region으로의 참조가 기로되어 있어서 이 부분만 확인하면 Old Region 전체를 확인하지 않아도 된다.
+                
         - Old Generation Collection
-            
-            
-        
-        만약 이러한 과정 중에 메모리가 모두 꽉차게 되면 다른 컬렉터와 같은 Full GC를 수행하게 된다.
+            - Young-only phase
+                - Concurrent Start - stop the world
+                    
+                    Young GC는 계속 일어나고 있고 동시에 Old GC를 위한 마킹 작업이 시작된다. 
+                    
+                - Remark - stop the world
+                    
+                    마킹 단계를 완료한다. CMS가 같은 단계에 사용하는 방법보다 빠른 SATB(snapshot at the beginning)이라는 알고리즘을 사용한다.
+                    
+                    이 단계에서 가비지로만 채워진 Region은 즉시 회수된다.
+                    
+                - Cleanup - stop the world
+                    
+                    Remembered Set을 비운다.
+                    
+                    각 Region들의 Live 객체 비율을 계산한다.
+                    
+            - Space Relcamation Phase
+                - Copying
+                    
+                    GC 대상이 되는 Region들을 수집하고 살아남은 객체들을 새로운 Old 영역으로 모은다.
+                    
         
         ---
         
@@ -351,11 +432,12 @@
         [https://docs.oracle.com/en/java/javase/18/gctuning/garbage-first-g1-garbage-collector1.html#GUID-F1BE86FA-3EDC-4D4F-BDB4-4B044AD83180](https://docs.oracle.com/en/java/javase/18/gctuning/garbage-first-g1-garbage-collector1.html#GUID-F1BE86FA-3EDC-4D4F-BDB4-4B044AD83180)
         
         [https://www.codetd.com/en/article/12528439](https://www.codetd.com/en/article/12528439)
+
         
     - G1GC의 가장 중요한 장점은? 다른 애들보다 나은 점은? ★
         
-        영역을 잘게 나누어서 처리한다는 점이 가장 중요
+        영역을 잘게 나눈후 공간을 여러번 청소하기 때문에 다른 GC들보다 pause time 짧다는 점이다.
         
-        큰 방은 가끔 치우는 것보다 작은 방을 자주 치우는 느낌
+        마치 큰 방은 가끔 오래 치우는 것과 큰 방을 작은 방으로 나누고 작은 방을 자주 빨리 치우는 것과 같다.
         
-        이 부분과 장점을 엮어서 생각해보자
+        CMS도 pause time이 짧지만 CMF 등 문제가 많다.
