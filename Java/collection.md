@@ -30,6 +30,9 @@
     ---
     
     남궁 성, 자바의 정석 3rd Edition, 1판 2쇄, 도우출판, 615p, 2016
+
+### Comparator, Comparable 2개가 존재하는 이유는?
+
 # List
 ### ArrayList vs LinkedList ★
     
@@ -85,3 +88,86 @@
     
     남궁 성, 자바의 정석 3rd Edition, 1판 2쇄, 도우출판, 590p, 2016
 
+# Map
+### 해시맵의 최악의 케이스는 무엇이고 자바는 어떻게 이것을 개선했을까? ★
+    
+    해시맵의 최악의 케이스는 하나의 bucket에 모든 값이 들어가는 경우입니다.
+    
+    기본적으로는 이 상황이 발생하지 않기 위해 해시맵 내부의 배열의 크기를 크게 만들거나 해시함수를 최대한 잘 만들어야 합니다.
+    
+    해시 함수 같은 경우 JDK 1.4 이후부터는 보조 해시 함수라는 것을 사용해서 기존보다 해시 충돌이 적게 일어날 수 있도록 개선되었습니다.
+    
+    자바 8부터는 bucket에 들어가는 자료구조를 변경하여 성능을 더 개선하였는데요.
+    
+    자바 8 이전까지는 bucket에 LinkedList를 담는 방식으로 해시 충돌을 처리했기 때문에 O(N)만큼의 시간복잡도를 가지고 있었습니다.
+    
+    그러나 자바 8 이후부터는 bucket이 특정 threshold를 넘을 경우 Linked List가 아닌 Red Black Tree를 사용하여 시간복잡도가 O(logN)이 되도록 개선하였습니다.
+    
+    모든 경우에 대해서 Red Black Tree를 쓰지 않는 이유는 데이터가 작을 때는 두 방식의 성능 차이가 유의미하지가 않은 반면 Red Black Tree는 Linked List보다 메모리 사용량이 많기 때문이다.
+    
+    ---
+    
+    [https://d2.naver.com/helloworld/831311](https://d2.naver.com/helloworld/831311)
+    
+### 해시맵의 동작 원리는?
+    
+    해시맵의 자료구조는 배열과 링크드 리스트의 조합으로 되어 있다.
+    
+    key에 해싱함수를 적용하여 배열에 대한 인덱스를 알아낸다.
+    
+    그리고 value를 배열에 있는 링크드 리스트에 연결한다
+    
+    [HashMap](https://www.notion.so/HashMap-f606dab3e77a47e7ac7f74ce4d1d8696)
+    
+    ---
+    
+    남궁 성, 자바의 정석 3rd Edition, 1판 2쇄, 도우출판, 651-652, 2016
+    
+### 해시맵과 해시테이블의 차이점은?
+    1. 해시테이블은 thread-safe하나 해시맵은 그렇지 않다. 
+        
+        대신 Collections.synchronizedMap()을 이용하거나 직접 lock code를 작성하여 thread-safe한 HashMap을 만들 수 있다.
+        
+        해시맵은 동기화하지 않기 때문에 더 빠르고 메모리도 덜 차지한다.
+        
+        일반적으로 싱글 쓰레드에서 unsynchronized object가 synchronized one보다 더 빠르다.
+        
+    2. 해시맵은 key나 value로 null을 허용하는 반면 해시테이블은 허용하지 않는다.
+    
+### 언제 해시맵을 쓰고 언제 해시테이블을 써야할까?
+    
+    싱글 쓰레드와 같이 동기화가 필요한 상황이 아니라면 해시맵을 쓰는 것이 낫다.
+    
+    해시테이블은 JDK1.8부터 deprecated 됐기 때문에 쓰지 않는 것이 낫고, 
+    동기화가 필요한 상황이라면 ConcurrentHashMap을 쓰는 것이 낫다.
+    
+    ---
+    
+    [https://www.baeldung.com/hashmap-hashtable-differences#:~:text=Firstly%2C Hashtable is thread-safe,safe version of a HashMap](https://www.baeldung.com/hashmap-hashtable-differences#:~:text=Firstly%2C%20Hashtable%20is%20thread-safe,safe%20version%20of%20a%20HashMap).
+    
+### 해시충돌은 배열을 크게 늘릴수록 개선이 되는데 그럼 무작정 늘리면 좋을까?
+    
+    해시맵에서 iterator를 쓸 때는 배열의 크기에 비례해서 시간이 걸리므로 무작정 늘리는 것은 좋지 않다.
+    
+    해시맵에 어느정도의 원소들이 들어갈지 예상하고 load factor 고려해서 초기에 정해주는 게 제일 좋다.
+    
+    ---
+    
+    Java 11 API document - HashMap 설멍부분
+
+# Set
+### TreeSet이란? 필요한 이유?
+    
+    TreeSet이란 이진 검색 트리라는 자료구조로 데이터를 저장하는 컬랙션 클래스다.
+    
+    이진 검색 트리를 사용하기 때문에 HashSet보다 성능은 떨어지지만 정렬된 형태를 유지할 수 있다.
+    
+    자바에서는 이진 검색 트리의 최악의 케이스를 막도록 도와주는 Red Black Tree를 사용한다.
+    
+### TreeSet이 정렬을 유지하는 법은?
+    
+    TreeSet은 기본적으로 이진 검색 트리를 내부적으로 사용한다.
+    
+    이진 검색 트리를 왼쪽부터 중위 순회하게 되면 오름차순으로 읽을 수 있게 된다.
+    
+    반대로 하면 내림차순이다.

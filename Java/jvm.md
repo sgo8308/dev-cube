@@ -1,3 +1,46 @@
+# JVM
+### JVM이란?
+    
+    jvm은 스택 기반의 해석 머신이다.
+    
+    마치 실제 컴퓨팅 머신처럼 instruction set을 가지고 있고 다양한 메모리 영역을 조작한다.
+    
+    이외에도 GC 등 여러 기능을 제공한다.
+    
+    - JVM도 VMWare같은 가상 머신인가?
+        
+        아니다.
+        
+        VMWare는 비디오 카드, 네트워크 외 다른 하드웨어가 포함된 가상 컴퓨터에 가깝다.
+        
+        반면에 JVM은 JVM이 이해할 수 있는 바이트 코드를 실행한다는 점에서(실제로는 네이티브 코드로 바꿔서 실제 CPU에 전달되는 것이지만) 가상화된 프로세서에 가깝다.
+        
+        ---
+        
+        [https://stackoverflow.com/questions/861422/is-the-java-virtual-machine-really-a-virtual-machine-in-the-same-sense-as-my-vmw#:~:text=on this post.-,No.,kind are system virtual machines](https://stackoverflow.com/questions/861422/is-the-java-virtual-machine-really-a-virtual-machine-in-the-same-sense-as-my-vmw#:~:text=on%20this%20post.-,No.,kind%20are%20system%20virtual%20machines).
+        
+### JVM을 공부해야 하는 이유?
+    
+    더 좋은 소프트웨어를 개발할 수 있고, 성능 이슈를 탐구할 때 필요한 이론적 배경지식을 갖출 수 있다.
+    
+    ---
+    
+    벤저민 J. 에번스 외 2명, 자바 최적화, 이일웅, 초판 1쇄, 한빛미디어, 41p, 2019
+    
+### 왜 새로운 언어들이 JVM을 이용하려고 할까 (feat Clojure)?
+    
+    수많은 자바의 라이브러리들을 이용할 수 있다.
+    
+    GC를 이용할 수 있다.
+    
+    하드웨어에 종속되지 않을 수 있다.
+    
+    이 많은 기능을 다시 구현하는데 많은 시간이 걸릴 것이므로 JVM을 이용하는게 낫다.
+    
+    ---
+    
+    [https://www.quora.com/Why-are-so-many-JVM-based-programming-languages](https://www.quora.com/Why-are-so-many-JVM-based-programming-languages)
+
 # JVM 구조
 ### JVM 구조는 어떻게 이루어져 있을까?
     JVM은 세 파트로 이루어져 있다.
@@ -25,18 +68,20 @@
 ### 클래스로딩 과정은?
     
     Loading → Linking → Initializing의 3단계로 구성되어 있다. 
-    
+
     - loading
         
         클래스를 한 번에 로딩하지 않고 애플리케이션에 의해서 필요할 때 클래스 이름을 통해 파일 시스템으로부터 class file을 찾아서 java.lang 해키지의 Class 클래스의 객체를 생성한다.
-
-    - linking 
-    
-        링크 작업이 수행된다. 이 단계에서 static 필드를 생성 및 초기화하고 메서드 테이블을 할당한다.
-
-    - initializing
-
-        클래스가 초기화된다.
+        
+    - linking
+        
+        링크 작업이 수행된다. 이 단계에서 static 필드를 생성 및 default value로 초기화하고 메서드 테이블을 할당한다. 
+        이 과정에서 클래스에 constant pool에 있는 symbolic reference들이 실제 메모리 주소로 바뀔 수도 있고(static resolution) 
+        실제로 runtime에 사용될 때 바뀔 수도 있다.(lazy resolution).
+        
+        static resolution시 참조하는 클래스가 아직 loading되지 않았다면 이 클래스에 대한 loading을 한다. 
+        
+    - 클래스가 초기화된다. <clinit> → static 초기화 블록이나 static 변수에 대한 초기화
     
     ---
     
@@ -65,10 +110,31 @@
     ---
     
     [https://www.baeldung.com/java-classloaders](https://www.baeldung.com/java-classloaders)
-    
-### Runtime Constatnt pool은 무엇일까?
-    
+
+### Runtime Constant pool은 무엇일까?
+
     상수와 메소드와 필드에 대한 참조가 들어 있는 클래스마다 존재하는 테이블이다.
+
+    일반 언어에 심볼테이블과 비슷한 역할을 한다.
+
+    바이트코드에 있는 constant pool은 runtime constant pool을 만드는데 사용된다.
+
+    두개에 엔트리가 있다 : 나중에 reolved될 symbolic references(보통 이름), 나중 작업이 필요 없는 static constants
+
+    나중에 dynamic linking 과정에서 이런 symbolic reference들이 실제 주소로 변환된다.
+      
+    ---
+
+    [https://docs.oracle.com/javase/specs/jvms/se17/html/jvms-5.html#jvms-5.1](https://docs.oracle.com/javase/specs/jvms/se17/html/jvms-5.html#jvms-5.1)
+
+### Dynamic linking이란?
+
+    C언어 같은 경우 실행 파일이 만들어지기 전 링크 과정에서 오브젝트 파일에 있는 symbolic reference들이 최종 실행 파일에 상대적인 메모리 주소로 바뀐다.
+
+    자바는 이러한 과정이 런타임에 동적으로 일어나는데 이러한 것을 Dynamic Linking이라고 한다.
+
+    Runtime Constant Pool에는 이러한 Linking 과정에서 사양되는 symblic reference들이 저장되어 있다.
+
 
 
 ### JVM Stack이란?
@@ -201,7 +267,13 @@
 참조 문헌
   
 - 웹 문서 [https://www.oracle.com/webfolder/technetwork/tutorials/mooc/JVM_Troubleshooting/week1/lesson1.pdf](https://www.oracle.com/webfolder/technetwork/tutorials/mooc/JVM_Troubleshooting/week1/lesson1.pdf), 27p
-
+### Jit Comiler란?
+    
+    JVM이 바이트코드에서 자주 실행되는 hot한 영역을 찾아서 미리 native로 컴파일해서 code cache에 보관해놨다가 필요할 때 인터프리팅 없이 사용할 수 있게 해주는 기능.
+    
+    ---
+    
+    [https://blog.jamesdbloom.com/JVMInternals.html](https://blog.jamesdbloom.com/JVMInternals.html#dynamic_linking)
 ### code cache란 무엇인가?
     
     JIT 컴파일러에 의해 컴파일된 코드를 보관하는 영역이며 네이티브 메모리에 할당된다.
