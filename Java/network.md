@@ -39,3 +39,24 @@
     ---
     
     [https://docs.microsoft.com/en-us/windows-server/security/tls/transport-layer-security-protocol#:~:text=The TLS (and SSL) protocols,support multiple application layer protocols]
+
+### 소켓이란?
+    
+    프로세스는 소켓 인터페이스를 이용해 소켓 객체를 만들 수 있고 이렇게 만들어진 소켓 객체를 소켓이라 부르고,
+    소켓 인터페이스를 이용해서 프로그래밍하는 것을 소켓 프로그래밍이라 한다.
+
+    리눅스로 예를 들면, 리눅스의 네트워킹은 세 층으로 구분된다
+    
+    소켓 인터페이스, 프로토콜 스택, 네트워킹 드라이버
+    
+    네트워크 인터페이스 카드는 네트워킹 드라이버를 통해 커널에 프로토콜 스택과 패킷 데이터를 주고 받는다.
+    
+    프로세스는 소켓을 통해 프로토콜 스택과 패킷 데이터를 주고 받는다.
+    
+    프토코콜 스택은 출발 주소, 도착 주소, 출발 포트 번호, 도착 포트 번호 합친 것을 key로 한 해시테이블에  소켓을 관리한다.
+    
+    ---
+    
+    [https://en.wikipedia.org/wiki/Network_socket#Implementation](https://en.wikipedia.org/wiki/Network_socket#Implementation)
+    
+    Abraham Silberschatz 외 2명, 운영체제, 박민규, 1쇄, 퍼스트 북, 892-894 ,2020
