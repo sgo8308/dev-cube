@@ -17,6 +17,28 @@
     ---
     
     이상민, 자바의 신, 2판 1쇄, 로드북, 706p, 2017
+
+### Serialization과 Transiant 키워드를 같이 설명해주세요. ★
+    
+    Serialization이란 Serializable 인터페이스를 구현한 오브젝트와 그 오브젝트가 참조하는 오브젝트를 바이트 스트림으로 인코딩하는 기능이다. 
+    
+    인코딩된 바이트 스트림은 다른 곳으로 전달하는데 쓰이고 다시 Deserialization이 **가능하다.
+    
+    이 때 transient가 붙은 데이터는 인코딩 대상에서 제외한다.
+    
+    ---
+    
+    [https://docs.oracle.com/javase/8/docs/technotes/guides/serialization/index.html](https://docs.oracle.com/javase/8/docs/technotes/guides/serialization/index.html)
+    
+### try with resource란?
+    
+    tyr 구문에 소괄호가 생기는데 이 부분에 하나 또는 그 이상의 리소스를 선언하면 자동적으로 try구문이 끝날 때 리소스를 close해주는 자바에서 지원하는 문법이다.
+    
+    마찬가지로 catch와 finally 구문을 같이 쓸 수 있는데 이 구문들은 리소스가 close되고 넘어간다.
+    
+    ---
+    
+    [https://docs.oracle.com/javase/tutorial/essential/exceptions/tryResourceClose.html](https://docs.oracle.com/javase/tutorial/essential/exceptions/tryResourceClose.html)
     
 ### stream은 왜 stream일까?
     
@@ -53,7 +75,7 @@
     
     일반적인 stream의 성능을 향상시키기 위해 나온 보조 스트림으로 내부적으로 일반 stream을 갖고 있다.
     
-    Buffered Stream은 버퍼라고 불리는 메모리 영역이 완전히 빌 경우 시스템 콜을 호출하여 데이터를 읽고, 완전히 찰 경우 버퍼가 가득 찰 경우 데이터를 내보낸다.
+    Buffered Stream은 버퍼라고 불리는 메모리 영역이 완전히 빌 경우 시스템 콜을 호출하여 데이터를 읽고,버퍼가 가득 찰 경우 데이터를 내보낸다.
     
     즉 한번에 읽고 씀으로써 성능을 향상시킨다.
     
@@ -115,3 +137,93 @@
         [https://en.wikipedia.org/wiki/System_resource]
         
         이상민, 자바의 신, 2판 1쇄, 로드북, 719p, 2017
+
+# NIO
+
+### NIO란?
+    
+    NIO란 non-bloking I/O를 줄인 말이다.
+    
+    ---
+    
+    [https://docs.oracle.com/javase/8/docs/technotes/guides/io/enhancements.html](https://docs.oracle.com/javase/8/docs/technotes/guides/io/enhancements.html)
+    
+### IO와 NIO의 차이점은?
+    - IO는 입출력 방식으로 스트림을 사용하고 NIO는 채널을 사용한다.
+        
+        스트림은 단방향이고 채널은 양방향이다.
+        
+    - IO는 넌버퍼 방식이 NIO는 버퍼 방식이다.
+        
+        IO는 대신에 BufferedReader같이 버퍼 기능이 있는 보조 스트림이 있다.
+        
+    - IO는 동기 방식이고 NIO는 동기 / 비동기 모두 지원한다.
+    - IO는 블로킹 방식이고 NIO는 블로킹 / 논블로킹 모두 지원한다.
+        
+        입력 스트림의 read() 메소드나 출력 stream의 wirte()를 호출하면 데이터가 입력이나 출력되기 전까지 스레드는 블로킹 됨.
+        
+        스레드는 interrupt()를 해도 블로킹을 빠져나올 수 없으며 유일한 방법은 스트림을 닫는 것이다.
+        
+        반면에 NIO의 블로킹은 스레드가 interrupt되면 빠져나올 수 있다.
+        
+        넌블로킹 방식은 입출력 작업시 스레드가 블로킹도지 않는다.
+        
+    
+    ---
+    
+    유튜브 - 이것이 자바다 19.1 
+    
+### 동기 비동기 블로킹 논블로킹의 차이는?
+    
+    상황에 따라 다르게 쓰일 때가 있지만 주로 이런 의미이다.
+    
+    동기와 블로킹 방식은 같다. 쓰레드가 요청을 처리할 때까지 대기한다.
+    
+    논블로킹 방식은 블록되지 않고 만약 결과를 받을 수 없다면 바로 에러를 뱉고 받을 수 있으면 결고를 받는다. 따라서 결과가 준비되어있는지 확인할 방법이 필요하다.
+    
+    비동기 방식은 결과를 요청하고 블록되지 않고 쓰레드는 진행하고 요청된 결과를 백그라운드에서 처리된다.
+    
+    ---
+    
+    [https://stackoverflow.com/questions/2625493/asynchronous-and-non-blocking-calls-also-between-blocking-and-synchronous#:~:text=A nonblocking call returns immediately,complete at some future time](https://stackoverflow.com/questions/2625493/asynchronous-and-non-blocking-calls-also-between-blocking-and-synchronous#:~:text=A%20nonblocking%20call%20returns%20immediately,complete%20at%20some%20future%20time).
+    
+### 언제 IO 방식을 쓰고 언제 NIO 방식을 써야할까?
+    - 연결 클라이언트 수가 적고 전송되는 데이터가 대용량이면서 순차적으로 처리될 필요가 있을 경우 IO를 선택한다.
+        
+        왜냐하면 NIO는 버퍼를 쓰는데 버퍼의 크기는 정해져 있고 무한정 크게 만들 수 없기 때문에 데이터를 받아서 즉시 처리하는 것이 낫다.
+        
+    - 연결 클라이언트의 수가 많고, 전송되는 데이터 용량이 적으면서, 입출력 작업 처리가 빨리 끝나는 경우 NIO를 선택한다.
+        
+        넌블로킹 방식이기 때문에 연결 클라이언트의 수가 많아도 소수의 쓰레드로 처리가능하다.
+        
+        버퍼를 사용하기 때문에 입출력 성능이 좋다.
+        
+        왜냐하면 NIO는 쓰레드풀을 사용하는데 하나의 쓰레드가 입출력 작업을 너무 오래 처리하면 다른 일을 할 수가 없기 때문이다.
+        
+        ---
+        
+        유튜브 - 이것이 자바다 19.1
+        
+        [https://alkhwa-113.tistory.com/entry/NIO?category=921157](https://alkhwa-113.tistory.com/entry/NIO?category=921157)
+        
+### 버퍼란?
+    
+    버퍼란 읽고 쓰기가 가능한 메모리 배열로 Non-Direct와 Direct로 구분된다.
+    
+    ---
+    
+    [https://alkhwa-113.tistory.com/entry/NIO?category=921157](https://alkhwa-113.tistory.com/entry/NIO?category=921157)
+    
+### Non-Driect 버퍼와 Dircet 버퍼의 차이는?
+    
+    Direct 버퍼는 JVM 외부에 생성하기 위하여 커널 모드로 전환해야 되기 떄문에 생성시 시간이 오래 걸린다.
+    
+    대신에 큰 공간을 할당할 수 있고 JVM이 입출력시 OS와 소통하기 위해 중간 버퍼에 non-direct 버퍼등의 내용을 복사해서 옮기는 등에 작업이 필요없기 때문에 빠르다.
+    
+    일반적으로 Direct 버퍼는 프로그램 성능에 측정 가능할만한 이득을 얻을 수 있을 때 할당하는게 좋다. 
+    
+    ---
+    
+    [https://alkhwa-113.tistory.com/entry/NIO?category=921157](https://alkhwa-113.tistory.com/entry/NIO?category=921157)
+    
+    [https://docs.oracle.com/javase/7/docs/api/java/nio/ByteBuffer.html](https://docs.oracle.com/javase/7/docs/api/java/nio/ByteBuffer.html)

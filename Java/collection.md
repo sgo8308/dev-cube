@@ -171,3 +171,14 @@
     이진 검색 트리를 왼쪽부터 중위 순회하게 되면 오름차순으로 읽을 수 있게 된다.
     
     반대로 하면 내림차순이다.
+
+# Stream
+### Stream이란?
+    
+    컬렉션과 배열의 데이터를 선언적인 방식으로 처리할 수 있게 도와주는 API이다.
+    
+    또한 멀티코어를 활용한 멀티쓰레드 방식의 처리를 쉽게 할 수 있게 도와준다.
+    
+    ---
+    
+    [https://www.oracle.com/technical-resources/articles/java/ma14-java-se-8-streams.html](https://www.oracle.com/technical-resources/articles/java/ma14-java-se-8-streams.html)
