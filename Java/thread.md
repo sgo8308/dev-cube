@@ -397,7 +397,7 @@
 
       이러한 과정이 원자적으로 일어난다.
 
-      MIPS 같은 경우는 2개의 인스터력션(load linked, store conditional)으로 일어나지만 마지막 인스터럭션이 위와 같이 확인 과정을 거치기 때문에 2개의 인스트럭션이 원자적으로 일어난다.
+      MIPS 같은 경우는 2개의 인스터럭션(load linked, store conditional)으로 일어나지만 마지막 인스터럭션이 위와 같이 확인 과정을 거치기 때문에 2개의 인스트럭션이 원자적으로 일어난다.
 
       ARM은 하나의 인스트럭션으로 load와 store를 원자적으로 진행하기 때문에 다른 프로세스나 쓰레드가 끼어들 틈이 없다.
         
@@ -457,3 +457,16 @@
       쓰레드 객체는 종료된 후에도 종료되었는지에 대한 쓰레드의 상태를 얻을 수 있다.
     
       근데 다시 재사용된다면 이전 쓰레드에 대한 상태나 기록이 사라져 버리기 때문이 아닐까?
+### 하드웨어 쓰레드와 소프트웨어 쓰레드의 차이는? ★
+    
+    하드웨어 쓰레드는 가상의 코어라고 할 수 있다.
+    
+    소프트웨어 쓰레드는 이 가상의 코어 위에서 동작하는 프로세스의 흐름이다.
+    
+    기본적으로 코어 1개는 1개의 하드웨어 쓰레드를 갖고 있다고 할 수 있으며 하이퍼쓰레딩 방식을 이용해 하드웨어 쓰레드를 여러개로 늘릴 수 있다.
+    
+    ---
+    
+    [https://www.hp.com/us-en/shop/tech-takes/what-is-hyperthreading#:~:text=Hyper-threading is a process,threads or 4 virtual cores](https://www.hp.com/us-en/shop/tech-takes/what-is-hyperthreading#:~:text=Hyper-threading%20is%20a%20process,threads%20or%204%20virtual%20cores).
+    
+    [https://juneyr.dev/thread](https://juneyr.dev/thread)
