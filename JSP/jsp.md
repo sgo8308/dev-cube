@@ -7,11 +7,23 @@
     최범균, JSP2.3 웹프로그래밍, 가메출판사, 초판12쇄, 저자 서문,2021
     
 ### JSP라는 개념은 왜 등장했을까?
-### JSP가 무엇인가?
-    
-    JavaServer Pages의 줄임말로 동적 페이지를 작성하는데 사용되는 자바의 표준 기술로 HTML, XML, JSON, 바이너리 파일 등의 응답을 생성하는데 필요한 기능을 제공한다.
-    
+### JSP와 Servlet은 무엇인가?
+    - Servlet
+
+      Servlet은 JSP보다 먼저 나온 기술로 JSP와 비슷한 기능을 한다.
+
+      자바 코드 안에 HTML 코드가 들어간다는 특징 때문에 Data processing에 좋아서 MVC 아키텍쳐에서 Controller로 사용된다.
+
+    - JSP
+
+      JSP는 JavaServer Pages의 줄임말로 동적 페이지를 작성하는데 사용되는 자바의 표준 기술로 HTML, XML, JSON, 바이너리 파일 등의 응답을 생성하는데 필요한 기능을 제공한다.
+
+      Servlet을 보완하고 기술을 확장했으며 Java 코드 안에 HTML 코드가 들어간다는 특징 때문에 Presentation에 좋아서 MVC 아키텍쳐에서 View로 사용된다.
+
+
     ---
+    
+    [https://gmlwjd9405.github.io/2018/11/04/servlet-vs-jsp.html]
     
     최범균, JSP2.3 웹프로그래밍, 가메출판사, 초판12쇄, 43p,2021
     
@@ -24,6 +36,5 @@
         ---
         
         최범균, JSP2.3 웹프로그래밍, 가메출판사, 초판12쇄, 43p,2021
-        
 ### JSP는 어떤 원리로 동작하는가?
 ### JSP를 잘 사용하려면 어떻게 해야하는가?
