@@ -83,3 +83,21 @@
     ---
     
     김영한, 모든 개발자를 위한 HTTP 웹 기본 지식, 인프런
+
+### Rest API란 무엇인가요? ★
+    
+    Rest의 제약 조건을 모두 지킨 API를 Rest API라고 한다.
+    
+    하지만 실제로는 HTTP프로토콜을 사용하는 API를 Rest API라고 부른다.
+    
+    그리고 REST와 별로 상관은 없지만 Microsoft의 Rest API 가이드라인을 따라 URI로 자원을 표현하고 자원에 대한 행위는 HTTP Method로 표현하는 정도로 설계하면 Restful하게 API를 설계했다고 한다.
+    
+    하지만 정확히는 Rest 제약 조건을 모두 지켜야 Rest API이기 때문에 위와 같은 API는 HTTP API로 부르는 것이 낫다.
+    
+    ---
+    
+    [https://www.inflearn.com/questions/126743](https://www.inflearn.com/questions/126743)
+    
+    [https://velog.io/@lehdqlsl/Spring-boot-HTTP-API-만들기-Hello-World](https://velog.io/@lehdqlsl/Spring-boot-HTTP-API-%EB%A7%8C%EB%93%A4%EA%B8%B0-Hello-World)
+    
+    [https://www.infoq.com/news/2016/07/microsoft-rest-api/](https://www.infoq.com/news/2016/07/microsoft-rest-api/)

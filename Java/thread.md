@@ -470,3 +470,17 @@
     [https://www.hp.com/us-en/shop/tech-takes/what-is-hyperthreading#:~:text=Hyper-threading is a process,threads or 4 virtual cores](https://www.hp.com/us-en/shop/tech-takes/what-is-hyperthreading#:~:text=Hyper-threading%20is%20a%20process,threads%20or%204%20virtual%20cores).
     
     [https://juneyr.dev/thread](https://juneyr.dev/thread)
+
+### 스레드는 CPU코어와 관련있는데, 이러한 코어의 개수에 비해 자바 등 프로그램에서 더 많은 스레드를 할당하여 사용하는 이유가 무엇일까요? ★
+    
+    보통 하나의 쓰레드는 일정 시간동안 CPU를 100% 사용하지 않는다.
+    
+    70%를 CPU에 사용한다면 30%는 I/O와 같은 CPU가 필요없는 작업을 한다.
+    
+    이 시간동안 CPU를 놀게하는 것보다 다른 쓰레드에 CPU를 할당해주는 것이 효율적이다. 
+    
+    또한 10개의 작업이 동시에 처리해야하는 상황이 있다고 가정하자.
+    
+    4코어일 때 4쓰레드만 사용한다면 나머지 6개의 작업은 앞 작업이 끝날 때까지 기다려야 할 것이다.
+    
+    따라서 코어의 갯수에 맞춰서 쓰레드를 생성하는 것보다는 더 많은 쓰레드를 생성하는 것이다.
