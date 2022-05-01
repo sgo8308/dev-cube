@@ -191,4 +191,17 @@
     
     조상클래스에 정의된대로 public인 method를 호출했는데, 
     자식 클래스에서는 private으로 오버라이딩 되어있으면 제대로 작동하지 않을 것이다.
+### overloading은 어떻게 가능한 걸까? 왜 C언어는 overloading을 하지 못할까?
     
+    오버로딩은 자바의 컴파일러가 지원해주는 것이고 C언어는 컴파일러가 지원해주지 않기 때문이다.
+    
+    자바는 컴파일러가 심볼 테이블에 메서드 심볼을 저장할 때 메서드 이름 뿐만이 아니라 리턴 타입과 파리미터 정보까지 포함해서 저장한다. 
+    반면에 C언어의 컴파일러는 단순히 메서드 이름만으로 심볼을 저장한다.
+    
+    따라서 C언어에서 같은 이름의 메서드가 2개 이상 있다면 링킹 과정에서 어떤 메서드를 링킹해야하는지 링커가 알 수가 없다. 
+    
+    ---
+    
+    [https://stackoverflow.com/questions/1314613/is-there-a-reason-that-c99-doesnt-support-function-overloading](https://stackoverflow.com/questions/1314613/is-there-a-reason-that-c99-doesnt-support-function-overloading)
+    
+    [https://www.geeksforgeeks.org/does-c-support-function-overloading/](https://www.geeksforgeeks.org/does-c-support-function-overloading/)   
