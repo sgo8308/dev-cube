@@ -115,51 +115,6 @@
     
     null인 객체에 메소드를 호출하며 NullPointerException이 발생하기 때문에
     
-### 다형성(polymorphism)은 무엇인가?
-    
-    poly = 많은 morphism = 형태의 뜻을 가진 그리스어이다.
-    
-    즉 많은 형태라는 뜻으로, 구체적으로 하나의 메소드가 다양한 방식으로 작동하는 것을 의미한다.
-    
-    자바에서 다형성은 컴파일 타임 다형성과 런타임 다형성으로 나누어지는데 
-    이 둘은 오버로딩과 오버라이딩으로 구현할 수 있다.
-    
-    ---
-    
-    [https://www.javatpoint.com/runtime-polymorphism-in-java](https://www.javatpoint.com/runtime-polymorphism-in-java)
-    
-    [https://en.wikipedia.org/wiki/Polymorphism_(computer_science)](https://en.wikipedia.org/wiki/Polymorphism_(computer_science))
-    
-    - 컴파일 타임 다형성과 런타임 다형성의 차이는?
-        
-        컴파일 타임에 어떤 메소드가 쓰일지 결정된다면 컴파일 타임 다형성이고
-        
-        런타임에 어떤 메소드가 쓰일지 결정된다면 런타임 다형성이다.
-        
-        예를 들어 A라는 클래스가 있고 eat()와 eat(String name)의 형태로 메소드가 오버로딩되어 있다고 가정하자.
-        A라는 클래스를 인스턴스화 한후 eat(”h”)라는 메소드를 호출하자.
-        
-        이 때 컴파일을 하고 나면 바이트 코드는 정확히 eat(String name)을 호출하도록 된다.
-        
-        즉 컴파일 타임에 어떤 메소드가 쓰일지 결정되는 것 이다.
-        
-        다음은 A라는 클래스를 상속한 B라는 클래스를 A 타입을 가진 변수에 할당하고,
-        오버라이딩한 메소드 eat()를 호출했다고 가정하자.
-        
-        컴파일이 되고 난 후에는 바이트 코드에 A의 eat()를 사용한다고 나와 있다.
-        
-        따라서 컴파일 이후에도 여전히 어떤 메소드가 쓰일지 결정된 상황이 아니다.
-        
-        런타임이 되어서야 jvm이 eat()메소드를 실행할 때 B의 eat()가 적혀 있는 주소로 가서 메소드를 실행하게 될 것이다.
-        
-        ---
-        
-        [https://www.javatpoint.com/runtime-polymorphism-in-java](https://www.javatpoint.com/runtime-polymorphism-in-java)
-        
-        [https://en.wikipedia.org/wiki/Polymorphism_(computer_science)](https://en.wikipedia.org/wiki/Polymorphism_(computer_science))
-        
-        [https://dzone.com/articles/how-does-jvm-handle-polymorphism-method-overloadin](https://dzone.com/articles/how-does-jvm-handle-polymorphism-method-overloadin)
-        
 ### 런타임 다형성은 내부적으로 어떻게 구현되어 있을까?
     
     A라는 클래스를 상속한 B라는 클래스를 A 타입을 가진 변수에 할당하고,
@@ -246,7 +201,86 @@
         이렇게 class라는 키워드를 통해 추상화해서 표현하는 것을 모델링이라고 한다
         
     - 다형성
-    
+        poly = 많은 morphism = 형태의 뜻을 가진 그리스어이다.
+        
+        즉 많은 형태라는 뜻으로, 구체적으로 하나의 메소드가 다양한 방식으로 작동하는 것을 의미한다.
+        
+        자바에서 다형성은 컴파일 타임 다형성과 런타임 다형성으로 나누어지는데 
+        이 둘은 오버로딩과 오버라이딩으로 구현할 수 있다.
+        
+        ---
+        
+        [https://www.javatpoint.com/runtime-polymorphism-in-java](https://www.javatpoint.com/runtime-polymorphism-in-java)
+        
+        [https://en.wikipedia.org/wiki/Polymorphism_(computer_science)](https://en.wikipedia.org/wiki/Polymorphism_(computer_science))
+        
+        - 컴파일 타임 다형성과 런타임 다형성의 차이는?
+            
+            컴파일 타임에 어떤 메소드가 쓰일지 결정된다면 컴파일 타임 다형성이고
+            
+            런타임에 어떤 메소드가 쓰일지 결정된다면 런타임 다형성이다.
+            
+            예를 들어 A라는 클래스가 있고 eat()와 eat(String name)의 형태로 메소드가 오버로딩되어 있다고 가정하자.
+            A라는 클래스를 인스턴스화 한후 eat(”h”)라는 메소드를 호출하자.
+            
+            이 때 컴파일을 하고 나면 바이트 코드는 정확히 eat(String name)을 호출하도록 된다.
+            
+            즉 컴파일 타임에 어떤 메소드가 쓰일지 결정되는 것 이다.
+            
+            다음은 A라는 클래스를 상속한 B라는 클래스를 A 타입을 가진 변수에 할당하고,
+            오버라이딩한 메소드 eat()를 호출했다고 가정하자.
+            
+            컴파일이 되고 난 후에는 바이트 코드에 A의 eat()를 사용한다고 나와 있다.
+            
+            따라서 컴파일 이후에도 여전히 어떤 메소드가 쓰일지 결정된 상황이 아니다.
+            
+            런타임이 되어서야 jvm이 eat()메소드를 실행할 때 B의 eat()가 적혀 있는 주소로 가서 메소드를 실행하게 될 것이다.
+            
+            ---
+            
+            [https://www.javatpoint.com/runtime-polymorphism-in-java](https://www.javatpoint.com/runtime-polymorphism-in-java)
+            
+            [https://en.wikipedia.org/wiki/Polymorphism_(computer_science)](https://en.wikipedia.org/wiki/Polymorphism_(computer_science))
+            
+            [https://dzone.com/articles/how-does-jvm-handle-polymorphism-method-overloadin](https://dzone.com/articles/how-does-jvm-handle-polymorphism-method-overloadin)
+        
     ---
     
     김종민, 스프링 입문을 위한 자바 객체 지향의 원리와 이해, 초판 4쇄, 위키북스, [, 107-117, 89, 2020
+
+
+### 객체 지향의 5대 원칙(SOLID)에 대해서 설명해주세요
+    - SRP(Single Resposibility Principle)
+    - OCP(Open-Cloesd Principle)
+    - LSP(Liskov Substitution Principle)
+    - ISP(Interface Segregation Principle)
+    - DIP(Dependency inversion Principle)
+        
+        DIP란 상위 수준의 모듈이 하위 수준의 모듈의 의존하지 않고 하위 수준의 모듈이 하쉬 수준의 모듈에 의존하게 하게해서
+        고수준 모듈의 변경은 최소화하고 저수준 모듈의 변경의 유연함을 높혀주는 것을 말합니다.
+        
+        고수준 모듈은 상위 수준의 정책을 구현하는 클래스 또는 패키지라고 할 수 있고 
+        저수준 모듈은 고수준 모듈의 기능을 구현하기 위해 필요한 하위 기능을 실제로 구현하는 클래스 또는 패키지라 할 수 있습니다.
+        
+        예를 들어 ‘이미지 저장’이라는 기능을 제공하는 고수준 모듈이 있습니다. 이 모듈이 저수준 모듈에 의존하고 있기 때문에 고수준 모듈의 코드에는 Astorage.save()와 같은 코드가 들어있다고 하겠습니다.
+        
+        만약 저장하는 저장소가 Astorage에서 Bstoreage로 바뀌게 된다면 고수준 모듈의 코드는 Astorage.save()에서 Bstorage.save()로 바뀌어야 합니다.
+        
+        고수준의 정책이 바뀌지 않았는데 저수준의 구현 변경으로 인해 고수준 모듈의 코드가 변경이 되는 것입니다.
+        
+        이 때 고수준 모듈의 관점에서 FileService라는 추상타입을 정의하고 저수준 모듈이 이 FileService라는 고수준 모듈에 의존하게 만들면 DIP를 지키게 됩니다.
+        
+        이 때 코드는 fileService.save()로 추상화된 형태가 될 것이고 Astorage에서 Bstorage로 바뀌어도 이 코드는 변화가 없을 것입니다.
+        
+        ---
+        
+        최범균, 객체 지향 프로그래밍 입문, 인프런, DIP파트 
+        
+        - 왜 고수준 모듈이 저수준 모듈에 의존하는 것이 좋지 않은 설계일까?
+            
+            저수준의 모듈은 자주 변경될 수 있기 때문에 이러한 설계는 좋지 않습니다.
+            자주 바뀌지 않는 고수준 모듈에 저수준 모듈이 의존하는 것이 더 좋은 설계라고 할 수 있습니다. 
+            
+            단순하게 생각해서 한달의 고수준 모듈이 1번 변경되고 저수준 모듈이 10번 변경된다고 가정할 때, 
+            고수준 모듈이 저수준 모듈에 의존하면 고수준 모듈은 총 11번 변경되고 저수준 모듈은 10번 변경될 것입니다. 
+            하지만 저수준 모듈이 고수준 모듈에 의존하게 되면 고수준 모듈은 1번 변경될 것이고, 저수준 모듈은 11번 변경될 것입니다.
