@@ -172,6 +172,26 @@
     
     반대로 하면 내림차순이다.
 
+# Stack
+### Stack은 좋지않은 구현이라고 하는데 이유가 뭘까?
+    일단 Stack은 Vector의 한 분류가 아님에도 불구하고 상속 관계에 있으므로 상속을 잘못 사용했다.
+
+    또한 Stack은 Vector를 상속했기 때문에 메소드의 모든 내부 구현에서 부모인 Vector의 메소드를 사용한다.
+    
+    Vector는 모든 메서드에 synchronized가 걸려있다. 
+    
+    따라서 메서드를 사용할 때 마다 lock을 획득하고 반납하는 오버헤드가 걸린다.
+    
+    멀티 쓰레드 프로그램이 아닐 경우 이러한 오버헤드는 불필요할 뿐더러 멀티 쓰레드 프로그램이라 하더라도 특정한 상황에서 비효율적이다.
+    
+    예를 들면 for문에서 Vector의 get을 여러번 호출하는 경우 매 반복마다 lock을 획득하고 반납해야 한다.
+    lock을 한번만 획득하고 for문이 끝나면 반납하면 되는데 Vector는 메소드에 synchronized가 붙어 있어서 그게 불가능하다.
+
+    따라서 Stack은 좋지 않은 구현인 Vector를 상속했기 때문에 좋지 않은 구현이다.
+    
+    ---
+    
+    [https://aahc.tistory.com/8](https://aahc.tistory.com/8)
 # Stream
 ### Stream이란?
     
@@ -182,3 +202,4 @@
     ---
     
     [https://www.oracle.com/technical-resources/articles/java/ma14-java-se-8-streams.html](https://www.oracle.com/technical-resources/articles/java/ma14-java-se-8-streams.html)
+
