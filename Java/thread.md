@@ -432,7 +432,28 @@
       ---
     
       [https://en.wikipedia.org/wiki/Double-checked_locking](https://en.wikipedia.org/wiki/Double-checked_locking)
+### Double-checked-locking대신 어떤 방법을 사용해야할까?
     
+    늦은 초기화 홀더 클래스 구문이란 것으로 비슷한 구현을 할 수 있다.
+    
+    public class A{
+    	private static class ResourceHolder{
+    		public static A resource = new A();
+    	}
+    
+    	public static A getResource(){
+    		return ResourceHolder.resource;
+    	}
+    }
+    
+    위와 같이 구현하면 ResourceHolder가 처음 사용될 때 그 안에 A에 대한 초기화가 일어나고 
+    그 후 resource를 건네주기 때문에 부분 구성된 객체 문제가 일어나지 않으면서 Double checked locking과 같은 역할을 해줄 수 있다.
+    
+    Doublc checked locking 방식에서 resource에 volatile을 해주는 방식도 문제는 없어지지만 위 방식이 더 이해하기 쉽다.
+    
+    ---
+    
+    더그 리 외 5명, 자바 병렬 프로그래밍, 강철구, 에이콘출판주식회사, 1쇄, 502p,2008   
 ### 다른 영역은 공유하면서 스택은 왜 공유하지 않을까?
     
       만약 스택을 공유한다면 어떤 쓰레드가 메소드를 실행해서 스택에 프레임이 생긴 후 다른 쓰레드가 실행한 프레임이 위에 쌓일 것이다.
