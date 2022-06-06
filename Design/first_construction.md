@@ -61,8 +61,17 @@
     
     [https://blog.lulab.net/programmer/what-should-i-log-with-an-intention-method-and-level/](https://blog.lulab.net/programmer/what-should-i-log-with-an-intention-method-and-level/)
     
-- 무엇을 로깅해야할까?
-    
+### 무엇을 로깅해야할까?
+    DEBUG : 개발 과정에서 체크하고 싶은 것들 
+
+    INFO : 서비스의 목적 달성을 성공적으로 하는지 분석 및 확인하는 용도.
+
+    ERROR : ‘의도하지 않은’ 오류를 명시적으로 표현. 예외 상황이지만 의도한 상황이라면 INFO로 작성.
+             이렇게 할 경우 의도하지 않은 경우만 존재하기 때문에 빠르게 ERROR만 확인함으로써 장애 원인 파악이 가능하다.
+
+    ---
+
+    https://blog.lulab.net/programmer/what-should-i-log-with-an-intention-method-and-level/
     
 ### 어떤 방식으로 동작할까?
 ### 잘 사용하려면 어떻게 해야할까?
@@ -72,7 +81,7 @@
     
     ---
     
-    [https://blog.lulab.net/programmer/what-should-i-log-with-an-intention-method-and-level/](https://blog.lulab.net/programmer/what-should-i-log-with-an-intention-method-and-level/)
+    https://blog.lulab.net/programmer/what-should-i-log-with-an-intention-method-and-level/
     
 ### slf4j(Simple Logging Facade for Java)란?
     
