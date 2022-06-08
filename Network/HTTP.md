@@ -101,3 +101,18 @@
     [https://velog.io/@lehdqlsl/Spring-boot-HTTP-API-만들기-Hello-World](https://velog.io/@lehdqlsl/Spring-boot-HTTP-API-%EB%A7%8C%EB%93%A4%EA%B8%B0-Hello-World)
     
     [https://www.infoq.com/news/2016/07/microsoft-rest-api/](https://www.infoq.com/news/2016/07/microsoft-rest-api/)
+
+### 멱등성이란?
+    
+    HTTP 메서드의 특성 중 하나다. 
+    
+    나만 요청하는 경우에 한해서 한 번 요청하든 여러번 요청하든 첫 요청시와 서버의 상태가 같을 때 이 요청에 사용된 http 메소드는 멱등하다고 한다.
+    
+    예를 들어 get을 요러번 요청했을 때 서버의 상태는 처음 요청과 다를바 없다.
+    
+    delete로 a라는 파일을 없앴다고 하면 이 delete를 여러번 했을 때 서버에 a라는 파일이 없다는 상태는 처음과 동일하다.
+    
+    반면 post로 결제를 여러번 했을 때는 서버의 상태는 여러번 결제된 상태가 된다. 첫 post로 결제했을 때와 두번째 post로 결제했을 때 서버의 상태가 다르다. 
+    
+    멱등이 가능해야 서버가 TIMEOUT 등으로 정상 응답을 못주었을 때, 클라이언트가 같은 요청을 다시 해도 되는가에 대한 판단 근거가 되기 때문에 중요하다. 
+    그래서 POST같은 경우는 함부로 재요청을 할 수 없다.
