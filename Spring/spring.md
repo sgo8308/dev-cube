@@ -45,9 +45,15 @@
     
     요즘엔 거의 스프링 부트를 이용해 스프링을 사용한다.
     
-### 정의는?
+### 스프링 부트란 대체 무엇일까? 
     
-    여러 스프링 기술들을 편리하게 사용할 수 있도록 도와주는 기술
+    스프링의 확장판이다.
+
+    스프링 기술을 그대로 사용할 수 있으며 스프링 앱 개발을 훨씬 쉽게 만들어준다.
+
+    ---
+
+    https://www.interviewbit.com/blog/spring-vs-spring-boot/#:~:text=To sum up-,Spring Boot contains all of the functionality of the standard Spring framework while also making application development much easier.,-When compared to
     
 ### 사용해야 하는 이유는?
     
@@ -59,8 +65,25 @@
     
     ---
     
-    [https://www.ibm.com/cloud/learn/java-spring-boot#:~:text=Java Spring Boot](https://www.ibm.com/cloud/learn/java-spring-boot#:~:text=Java%20Spring%20Boot%20) (Spring%20Boot,ability%20to%20create%20standalone%20applications
+    https://www.ibm.com/cloud/learn/java-spring-boot#:~:text=Java Spring Boot
     
+### 왜 나왔을까?
+    
+    빠르게 스프링을 이용한 앱 개발을 시작할 수 있게 만들어 새로운 유저들으 스프링에 많이 유입시키기 위해서 
+    
+    ---
+    
+    https://spring.io/blog/2013/08/06/spring-boot-simplifying-spring-for-everyone/#:~:text=Spring Boot aims to make it easy to create Spring-powered%2C production-grade applications and services with minimum fuss. It takes an opinionated view of the Spring platform so that new and existing users can quickly get to the bits they need
+    
+### 어떤 방식으로 동작할까?
+    
+    classpath와 bean들을 확인하고 필요한 것들을 추측한 후에 자동으로 넣어준다.
+    
+    예를 들어 Spring MVC가 클래스패스에 있다면 항상 필요한 빈들이 몇까지 있는데 이 빈들을 자동으로 넣어준다.
+    
+    ---
+    
+    https://spring.io/guides/gs/spring-boot/#:~:text=Spring Boot offers,a servlet container%2C
 ### 단점은?
     
     사용되지 않는 많은 의존성들이 추가될 수 있고 이는 배치 파일의 크기를 키운다.
