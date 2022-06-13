@@ -60,3 +60,48 @@
     ---
     
     [https://docs.oracle.com/javaee/6/api/javax/servlet/ServletContextListener.html](https://docs.oracle.com/javaee/6/api/javax/servlet/ServletContextListener.html)
+
+
+## 서블릿 예외처리
+### 공부해야 하는 이유는?
+    
+    스프링의 예외처리는 서블릿의 예외처리를 위에서 돌아가기 때문에 서블릿의 예외처리 방식을 알아야 여러가지 오류 상황에 대처할 수 있다.
+    
+### 순수한 서블릿 컨테이너는 예외를 어떤 식으로 처리할까?
+    
+    컨트롤러에서 발생한 예외가 순수 서블릿 컨테이너까지 전파되었을 때는 상태코드 500과 HTTP Status 500 - Internal Server Error라는 메시지를 화면에 뿌려준다.
+    
+    컨트롤러에서 response.sendError(404, “404오류!”) 와 같이 메소드를 사용해서 예외를 등록하면 서블릿 컨테이너는 response 객체에서 에러가 등록되었는지 확인하고 등록된 상태코드와 그에 맞는 메시지를 화면에 뿌려준다.
+    
+### 순수한 서블릿 컨테이너에서 원하는 예외 페이지를 일관되게 보여주려면 어떻게 할까?
+    
+    서블릿이 제공하는 기능을 사용하면 된다.
+    
+    web.xml에 <error-page>라는 태그를 통해 오류코드와 errorpage를 설정하면, 설정된 오류코드에 맞는 errorpage를 서블릿 컨테이너가 요청을 한다.
+    
+    또는 스프링 부트를 사용한다면 다음과 같은 방식으로 설정이 가능하다.
+    
+    //서블릿 컨테이너를 커스터마이징해주는 클래스
+    @Component
+    public class WebServerCustomizer implements WebServerFactoryCustomizer<ConfigurableWebServerFactory> {
+    
+        //서블릿 컨테이너가 오류코드에 맞는 에러 페이지를 나타내도록 설정하는 메소드
+        @Override
+        public void customize(ConfigurableWebServerFactory factory) {
+            ErrorPage errorPage404 = new ErrorPage(HttpStatus.NOT_FOUND, "error-page/404");
+            ErrorPage errorPage500 = new ErrorPage(HttpStatus.INTERNAL_SERVER_ERROR, "error-page/500");
+            ErrorPage errorPageEx = new ErrorPage(RuntimeException.class, "error-page/500");
+            factory.addErrorPages(errorPage404, errorPage500, errorPageEx);
+        }
+    }
+    
+    이 때 동작 흐름은 다음과 같다.
+    
+    WAS → 필터 → 서블릿(예외발생 혹은 sendError()) → 필터 → WAS(오류코드 확인 후 해당하는 error-page 요청) 
+    → 필터 → 서블릿(errorpage에 해당하는) → 필터 → WAS → 고객
+    
+    이 때 필터가 처음에만 호출되고 error 페이지를 다시 요청할 때는 안 거쳐도 되는데 중간에도 계속 중복으로 거치게 된다.
+    
+    이 때 DipatcherType이라는 것으로 이 요청이 고객의 요청인지 아니면 Error페이지를 요청하는 것인지를 구분할 수 있고 필터는 이 DispathcerType을 통해 필터링을 진행할 것인지 아닌지 결정할 수 있다.
+    
+    한 편 스프링을 사용하면 중간에 인터셉터를 거치게 되고 이 인터셉터 또한 중복으로 호출되는 문제가 있다. 하지만 인터셉터는 정교하게 urlpattern을 정할 수 있으므로 errorpage가 있는 url은 거르는 식으로 문제를 해결할 수 있다.

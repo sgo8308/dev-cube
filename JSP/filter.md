@@ -38,23 +38,37 @@
     
 ### 어떤 방식으로 동작할까?
     
-    요청 처리  : HTTP 요청 → WAS →  A 필터 →  B 필터(A 필터 중간에 호출) → 서블릿
-    
-    응답 처리 :  HTTP 응답 ← WAS ←  A 필터(A 필터 끝) ←  B 필터(B 필터 끝) ← 서블릿
-    
+    javax.servlet.Filter 인터페이스를 상속한 후 원하는 로직을 doFilter()메소드에 구현한다. 그 후 이 필터를 web.xml 또는 @WebFilter 어노테이션(필터 순서 조절이 안됨)을 이용하여 등록하면 서블릿 컨테이너가 필터를 싱글톤 객체로 생성하고 관리한다. 스프링 부트를 사용한다면 configuration 클래스에 FilterRegistrationBean을 사용해서 등록하면 된다. 
+
+    WAS는 서블릿보다 필터를 먼저 호출한다. 정확히는 필터의 doFilter를 호출한다. 이 후 필터 체인에 모든 필터를 거치고 더 이상 필터가 없으면 서블릿이 마지막 필터에 의해 호출된다.
+
+    URL로 매핑할 수도 있고 서블릿 이름으로 매핑할 수도 있다.
+
+    요청 처리  
+
+    : HTTP 요청 → WAS →  A 필터 →  B 필터(A 필터 중간에 호출) → 서블릿 → 컨트롤러
+
+    응답 처리 
+
+    :  HTTP 응답 ← WAS ←  A 필터(A 필터 끝) ←  B 필터(B 필터 끝) ← 서블릿 ← 컨트롤러
+
     이 때 사용되는 코드는 이와 같다.
-    
+
     public void doFilter(ServletRequest request, ServletResponse response,
                              FilterChain chain)
                              throws IOException, ServletException{
-    
-    //1. request를 이용하여 요청의 필터 작업 수행
+    //0. Http 뿐만 아니라 다른 요청을 위해 ServletRequest로 되어 있으므로 더 많은
+    //   쓰기 위해 HttpRequest로 다운 캐스팅한다.
+    HttpServletRequest httpRequest = (HttpServletRequest) request;
+    //1. httpRequest를 이용하여 요청의 필터 작업 수행
     ...
-    //2. 체인의 다음 필터 처리
-    chain.doFilter(request, response);  // 필터링ㅇ
+
+    //2. 체인의 다음 필터 처리. 다음 필터가 있으면 다음 필터를 호출하고 없으면 서블릿을 호출
+    chain.doFilter(request, response);
+
     //3. response를 이용하여 응답의 필터링 작업 수행
     ...
-    
+
     위와 같이 이루어지기 때문에 필터링은 요청과 응답 때 동일한 필터 객체가 담당하고 필터 적용 순서는 반대로 된다.
     
     ---
@@ -79,11 +93,10 @@
     
     최범균, JSP2.3 웹프로그래밍, 가메출판사, 초판12쇄, 557p,2021
     
-###장점과 단점은?
 
 ## Advanced
 
-###AOP를 사용해도 되는데 굳이 필터를 사용하는 이유는?
+### AOP를 사용해도 되는데 굳이 필터를 사용하는 이유는?
     
     웹과 관련된 공통 관심사는 HTTP의 헤더나 URL의 정보들이 필요한데, 서블릿 필터나 스프링 인터셉터는 ‘HttpServletRequest’를
     제공하고 그외에 여러가지 웹과 관련된 부가기능을 제공해주기 때문에 웹과 관련되었을 때는 AOP보다는 필터를 사용하는게 좋다. 
