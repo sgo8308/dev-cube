@@ -181,6 +181,21 @@
     
     RestControllerAdvice는 ControllerAdvice에 @ResponseBody가 붙은 것이다.
 
+
+### 필터나 인터셉터에서 예외가 터지면 ExceptionHandler가 처리할까?
+    
+    필터는 DispatcherServlet으로 들어오기 전에 작동한다.
+    
+    ExceptionHandler는 DispatcherServlet이 호출시켜주는 ExceptionResolver가 처리하기 때문에 필터의 예외는 처리하지 못한다.
+    
+    인터셉터의 preHandle()과 postHandle()은 ExceptionHandler가 잡아줄 수 있다. 하지만 afterCompletion()은 잡아줄 수 없다.
+    
+    잡히지 않은 예외는 WAS로 갔다가 /error로 요청을 할 것이고 이는 BasicErrorController가 처리를 할 것이다.
+    
+    ---
+    
+    DispatcherServlet.doDispatch(), DispatcherServlet.processDispatchResult() 코드
+
 ---
 
 김영한, 스프링 MVC 2편, 인프런, ExceptionHandler 파트
