@@ -40,7 +40,31 @@
 
     2. 의존성을 밖에서 주입해주기 때문에 Mock 객체를 사용해서 유닛 테스트하기가 쉬워진다.
     3. 또한 XML을 이용할 경우 구현체를 바꿀 때 자바 코드 변경, 재컴파일, 재배포할 필요 또한 없어진다.
-### 어떤 방식으로 동작할까?
+
+### 스프링 컨테이너란?
+    
+    BeanFactory나 ApplicationContext를 스프링 컨테이너라고 한다.
+    
+    ApplicationContext는 BeanFactory를 상속하고 그외의 수많은 부가기능을 제공한다.
+    
+    보통은 많은 기능을 제공하는 ApplicationContext를 주로 쓰므로 ApplicationContext를 스프링 컨테이너라고 생각하면 된다.
+    
+    스프링 빈을 생성하고 관리하며 DI를 담당한다. 
+    
+    @Configuration이 붙은 설정 클래스를 이용하거나 xml을 이용한 방식 등 여러가지 구현 방식을 사용할 수 있다.
+    
+### 스프링 컨테이너의 생성 과정은?
+    
+    ApplicationContext를 new를 통해서 생성하면 스프링 컨테이너가 생성된다.
+    
+    그리고 내부에 key와 value 형태로 빈 저장소를 갖는다.
+    
+    이 때 key는 bean이름 value는 빈이다.
+    
+    ---
+    
+    김연한, 인프런, 스프링 핵심 원리, 스프링 컨테이너 생성 파트
+### 스프링 컨테이너는 어떤 방식으로 동작할까?
 
     리플렉션을 통하여 클래스의 이름으로 클래스의 생성자나 메소드 등 클래스의 모든 것을 사용할 수 있다.
 
@@ -65,13 +89,29 @@
     
     [https://better-dev.netlify.app/java/2020/08/27/thejava_11/](https://better-dev.netlify.app/java/2020/08/27/thejava_11/)
 
-### 단점은?
+### 스프링 컨테이너를 이용항하여 IOC를 하는 것의 단점은?
     1. 간단한 프로그램을 만들 땐 번거롭다.
     2. 의존성 주입은 사용 영역과 구성 영역을 분리하기 때문에 런타임에 실제로 어떤 구현체가 실행될지 알기 어렵다.
 
     → 유지보수가 필요없는 간단한 프로그램을 만드는 경우를 제외하면 장점이 단점을 뛰어넘기 때문에 웬만하면 DI를 사용하는 것이 좋다.
 
-
+### 빈팩토리란?
+    
+    스프링 컨테이너의 최상위 인터페이스이다.
+    
+    스프링 빈을 관리하고 조회하는 역할을 담당한다. (getBean())
+    
+    ApplicationContext는 이 빈팩토리를 상속하기 때문에 기능 제공이 가능한 것
+    
+    ---
+    
+    김연한, 인프런, 스프링 핵심 원리, BeanFactory와 ApplicationContext 파트
+    
+### 어떻게 스프링 컨테이너는 여러가지 빈 설정 방식을 지원할까?
+    
+    스프링 컨테이너는 스프링 빈을 생성하기 위해 빈의 메타정보인 BeanDefinition이란 것이 필요하다. 스프링 컨테이너는 이 BeanDefinition에 의존하고 있기 때문에 자바 코드 방식(AppConfic.class)를 이용하든 XML 방식(AppConfig.xml)을 이용하든 이 BeanDefinition만 만들어내면 된다.
+    
+    각각의 AppicationContext 구현체들은 내부에 BeanDefinitionReader를 통해 이 BeanDefinition을 주어진 파일로부터 만들어낸다.
 ### ADVANCED
 
 ### ComponentScan 방식에서 의존관계 주입 방법은 어떤게 있고 언제 어떤 것을 사용하는 것이 좋을까?
