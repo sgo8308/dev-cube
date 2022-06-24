@@ -23,3 +23,27 @@
         ---
         
         [https://en.wikipedia.org/wiki/Command–query_separation](https://en.wikipedia.org/wiki/Command%E2%80%93query_separation)
+
+### 사용해야 하는 이유는?
+    
+    예를 들어 SHOP이라는 테이블은 가게명, 업주명, 사업자번호, 가게 연락처 등등 수많은 필드를 필요로 한다. 삽입, 수정, 삭제와 같은 Command는 이런 모든 필드들을 필요로 한다. 하지만 조회하는 입장에서 필요한 정보는 가게명, 업소명, 사업자번호 등으로 소수일 수 있다.
+    
+    이런 상황에서 Query를 위한 DB와 Command를 위한 DB를 분리한다면 Query용 DB는 최소한의 데이터로 관리가 될 것이고 이로 인해 조회 성능 또한 올라간다. 또한 Command용 DB에 문제가 생긴다고 하더라도 조회용 DB는 정상적이라면 정삭적으로 서비스를 운영할 수 있다. 즉 장애 격리가 가능하다.
+    
+    --- 
+
+    www.youtube.com/watch?v=BnS6343GTkY
+
+### 어떻게 구현할 수 있을까?
+
+    두 DB의 싱크를 맞추는 것이 중요하다.
+    
+    가게노출 DB는 Query용, 가게/업주 DB는 Command용으로 나뉘어져 있다고 하자.
+    
+    가게/업주 DB에 변경이 발생하면 가게노출 DB로 이벤트가 전송된다.
+
+    이벤트를 받은 가게/업주 DB는 변경된 데이터로 가지고 있는 데이터를 변경해준다.
+    
+    ---
+    
+    www.youtube.com/watch?v=BnS6343GTkY
