@@ -83,3 +83,50 @@
     ---
     
     김영한, 스프링 MVC 1편, 인프런, MVC 패턴 - 한계
+
+### 요청이 스프링에 도착했을 때 일어나는 일련의 과정은? ★
+    
+    모든 경로의 요청은 DispatcherServlet으로 들어간다. DispatcherServlet의 Service()메소드가 호출되고 이 안에서 doDispatch()메소드가 호출된다.
+    
+    DoDispatch() 메소드 세부내용
+    
+    1. 핸들러 조회: 핸들러 매핑을 통해 요청 URL에 매핑된 핸들러(컨트롤러)를 조회한다.
+    2. 핸들러 어댑터 조회: 핸들러를 실행할 수 있는 핸들러 어댑터를 조회한다.
+    3. 핸들러 어댑터 실행: 핸들러 어댑터를 실행한다.
+    4. 핸들러 실행: 핸들러 어댑터가 실제 핸들러를 실행한다.
+    5. ModelAndView 반환: 핸들러 어댑터는 핸들러가 반환하는 정보를 ModelAndView로 변환해서
+    반환한다.
+    6. viewResolver 호출: 뷰 리졸버를 찾고 실행한다.
+    JSP의 경우: InternalResourceViewResolver 가 자동 등록되고, 사용된다.
+    7. View 반환: 뷰 리졸버는 뷰의 논리 이름을 물리 이름으로 바꾸고, 렌더링 역할을 담당하는 뷰 객체를 반환한다.
+    JSP의 경우 InternalResourceView(JstlView) 를 반환하는데, 내부에 forward() 로직이 있다.
+    8. 뷰 렌더링: 뷰를 통해서 뷰를 렌더링 한다
+    
+    ---
+    
+    김영한, 스프링 웹 MVC, 인프런,  스프링 MVC 전체 구조
+    
+### 스프링 MVC에서 확장 가능한 포인트는 어떤 부분이 있고 어떻게 작동할까?
+    
+    요청을 처리할 수 있는 Handler를 찾아내는 HandlerMapping
+    
+    Handler를 일관된 인터페이스로 만들어주는 HandlerAdapter
+    
+    뷰 이름을 통해 뷰를 만들어주는 ViewResolver
+    
+    등을 확장할 수 있다.
+    
+    이들은 이미 스프링이 여러 방식의 클래스를 등록해놓는다.
+    
+    예를 들어 HandlerMapping 같은 경우는
+    
+    1. RequestMappingHandlerMapping - 애노테이션 기반 컨트롤러의 사용
+    2. BeanNameUrlHandlerMapping - 스프링 빈의 이름으로 핸들러를 찾음
+    
+    등이 등록되어 있는데 RequestMappingHandlerMapping을 통해 매칭되는 핸들러가 있는지 찾고 없으면 다음으로 BeanNameUrlHandlerMapping을 통해 매칭되는지 찾는다.
+    
+    다른 요소들도 이런 방식으로 등록되어 있는 것들을 순서대로 이용해서 찾는다.
+    
+    ---
+    
+    김영한, 스프링 웹 MVC, 인프런,  스프링 MVC - 구조 이해 파트
