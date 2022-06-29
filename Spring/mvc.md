@@ -175,7 +175,8 @@
         
 ### 어떻게 핸들러 메소드들은 여러가지 파라미터를 사용해서 원하는 값을 변환해서 받고 여러가지 리턴 값을 변환해서 내보낼 수 있을까?
     
-    ![Untitled](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/9d3244a4-9045-4ce8-b892-5b9b3c533b4a/Untitled.png)
+![Untitled](https://user-images.githubusercontent.com/71138398/176466300-7769e77b-d673-4aa5-9f81-515124c5088f.png)
+
     
     **요청시**
     
