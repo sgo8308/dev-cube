@@ -113,6 +113,12 @@
     Handler를 일관된 인터페이스로 만들어주는 HandlerAdapter
     
     뷰 이름을 통해 뷰를 만들어주는 ViewResolver
+
+    Argument를 Resolve 해주는 ArgumentResolver
+
+    Return Value를 Resolve해주는 ReturnValueHandler
+
+    Http Message를 변환해주는 HttpMessageConverter
     
     등을 확장할 수 있다.
     
@@ -130,3 +136,78 @@
     ---
     
     김영한, 스프링 웹 MVC, 인프런,  스프링 MVC - 구조 이해 파트
+
+### HttpMessageConverter는 무엇이고 어떤 방식으로 동작할까?
+    - HttpMessageConverter란?
+        
+        Argument Resolver가 HttpMessage의 body를 객체나 String으로 변환할 때 사용하는 클래스
+        
+    - 어떤 방식으로 동작할까?
+        
+        **간결한 설명**
+        
+        요청이 들어올 때는 핸들러가 호출되기 전에 핸들러의 붙은 Parameter의 타입과 요청의 Content-type을 고려해서 HttpMessageConverter가 선택되고 이 Converter가 변환해서 HandlerMethod에 인자로 넣어준다.
+        
+        요청이 나갈 때는 요청 header의 Accept와 컨트롤러의 반환 타입을 고려해서 HttpMessageConverter가 선택되고 이 Converter가 변환해서 요청을 내보낸다.
+        
+        **상세한 설명**
+        
+        - HTTP 요청 데이터 읽기
+            - HTTP 요청이 오고, 컨트롤러에서 @RequestBody , HttpEntity 파라미터를 사용할 때
+            - 메시지 컨버터가 메시지를 읽을 수 있는지 확인하기 위해 canRead() 를 호출한다.
+                - 대상 클래스 타입을 지원하는가.
+                예) @RequestBody 의 대상 클래스 ( byte[] , String , HelloData )
+                - HTTP 요청의 Content-Type 미디어 타입을 지원하는가.
+                예) text/plain , application/json , */ *
+            - canRead() 조건을 만족하면 read() 를 호출해서 객체 생성하고, 반환한다.
+        - HTTP 응답 데이터 생성
+            - 컨트롤러에서 @ResponseBody , HttpEntity 로 값이 반환될 때
+            - 메시지 컨버터가 메시지를 쓸 수 있는지 확인하기 위해 canWrite() 를 호출한다.
+                - 대상 클래스 타입을 지원하는가.
+                    - 예) return의 대상 클래스 ( byte[] , String , HelloData )
+                - HTTP 요청의 Accept 미디어 타입을 지원하는가.(더 정확히는 @RequestMapping 의 produces )
+                    - 예) text/plain , application/json , **/ **
+            - canWrite() 조건을 만족하면 write() 를 호출해서 HTTP 응답 메시지 바디에 데이터를 생성한다.
+        
+        ---
+        
+        김영한, 스프링 MVC 1편, 인프런, HTTP 메시지 컨버터 파트
+        
+### 어떻게 핸들러 메소드들은 여러가지 파라미터를 사용해서 원하는 값을 변환해서 받고 여러가지 리턴 값을 변환해서 내보낼 수 있을까?
+    
+    ![Untitled](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/9d3244a4-9045-4ce8-b892-5b9b3c533b4a/Untitled.png)
+    
+    **요청시**
+    
+    핸들러 메소드로 전달되는 값들은 핸들러 메소드가 호출되기 전에 Argument Resolver를 통해서 핸들러 메소드의 파라미터 타입과 어노테이션 등에 따라 변환된다.
+    
+    이 때 만약 파라미터 가 @RequestBody를 어노테이션으로 갖고 있거나 HttpEntity를 타입으로 갖고 있다면 HttpMessageConverter를 이용해서 변환할 것이다.
+    
+    **응답시**
+    
+    리턴되는 값은 ReturnValueHandler에 의해서 ReturnType에 따라 변환된다.
+    
+    이 때 만약 @ResponseBody라는 어노테이션이 핸들러에 붙어 있거나 HttpEntity를 리턴한다면 HttpMessageConverter를 이용해서 변환할 것이다.
+    
+    ---
+    
+    김영한, 스프링 MVC 1편, 인프런, 요청 매핑 헨들러 어뎁터 구조 파트
+    
+### RedirectAttributes란 무엇이고 왜 쓸까?
+    
+    리다이렉트를 할 때 사용되는 값들을 key value 형태로 저장하는 자료구조다.
+    
+    "redirect:/basic/items/" + item.getId() 이렇게 사용하면 URL 인코딩이 안되서 위험하다.
+    
+    다음과 같이 사용할 수 있다.
+    
+    @PostMapping("/add")
+    public String addItemV6(Item item, RedirectAttributes redirectAttributes) {
+     Item savedItem = itemRepository.save(item);
+     redirectAttributes.addAttribute("itemId", savedItem.getId());
+     redirectAttributes.addAttribute("status", true);
+     return "redirect:/basic/items/{itemId}"; // "redirect:/basic/items/" + item.getId() 이렇게 사용하면 URL 인코딩이 안되서 위험하다.
+    }
+    
+    //itemId는 url에 사용되었고 사용되지 않은 status는 쿼리파라미터의 형태로 붙는다.
+    // ex.  http://localhost:8080/basic/items/5/?status=true
