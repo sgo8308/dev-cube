@@ -84,3 +84,35 @@
     
     [https://sqlbolt.com/lesson/select_queries_order_of_execution#:~:text=Because each part of the,what results are accessible where](https://sqlbolt.com/lesson/select_queries_order_of_execution#:~:text=Because%20each%20part%20of%20the,what%20results%20are%20accessible%20where).
     
+## LIMIT
+### LIMIT의 동작 원리는?
+    
+    LIMIT은 전체 쿼리를 일종의 short circuit하게 만들어준다고 할 수 있다.
+    
+    예를 들어 다음과 같은 쿼리가 있다고 하자.
+    
+    SELECT * FROM salaries ORDER BY salary LIMIT 10;
+    
+    이 쿼리의 실행 순서는 FROM SELECT ORDER BY LIMIT 순이다.
+    
+    LIMIT이 마지막에 실행되기 때문에 salary로 정렬된 모든 데이터를 다 탐색한 후에 그 중에서 10개를 반환할 것처럼 느껴진다.
+    
+    실제로는 ORDER BY를 수행하기 위해 salaries에서 모든 데이터를 다 탐색하긴 한다.
+    
+    하지만 ORDER BY에 의해서 정렬이 수행되면서 맨 위 10개의 데이터가 확인된 순간 정렬 작업을 멈추고 10개의 데이터를 반환한다.
+    
+    이번에는 다음과 같은 offset을 이용한 쿼리가 있다고 하자.
+    
+    SELECT * FROM salaries ORDER BY salary LIMIT 10000, 10;
+    
+    이 경우에는 10010개의 정렬된 데이터가 생길 때까지 기다린 후 ORDER BY 작업을 멈추고 앞에 10000개의 데이터를 제외하고 남은 10개의 데이터를 반환한다.
+    
+    ---
+    
+    백은빈, 이성욱, Real MySQL 8.0 2권, 2쇄, 위키북스, 78p, 2022
+    
+### 왜 LIMIT 200000, 10 일 때 200010개의 데이터를 찾아야 할까? 200000번째 데이터로 빠르게 찾아간 후 10개만 가져오면 안될까?
+    
+    LIMIT은 테이블이 최종적으로 구성되고 가장 마지막에 실행되기 때문에 불가능하다.
+    
+    LIMIT가 실행되기 전에 앞 작업들이 먼저 이루어져야하고 따라서 이 작업들을 만족하는 200010개의 데이터가 찾아질 때까지 기다려야 한다.
