@@ -131,33 +131,93 @@
         - PHANTOM READ
             
             범위 검색 시 처음에는 없던 데이터가 중간에 다른 트랜잭션의 삽입으로 인해 보이게 되는 것
+            범위 락을 사용하지 않는다면 이 문제가 나타난다. 
             
     - REPEATABLE READ
         
         말 그대로 REPEATABLE READ가 가능한 격리 수준이다.
-        
-        첫번째 SELECT를 진행했을 때 찍은 스냅샷에 데이터만 계속 읽는다.
-        
-        PHANTOM READ의 문제가 있다. 
-        
+
+        MVCC를 사용한다면 이전 버전의 데이터를 저장하고 자신보다 먼저 진행된 트랜잭션이 변경한 데이터만 SELECT하게함으로써 달성할 수 있다.
+
+        MVCC를 사용하지 않는다면 SELECT할 때 공용 락을 걸어서 데이터의 수정이 일어나지 않게 함으로써 달성할 수 있다.
+
+        PHANTOM READ의 문제가 있다.
+
         - 왜 PHANTOM READ의 문제가 생길까?
+            - MVCC 방식에서
+    
+                MVCC 방식을 사용했을 때는 PHANTOM READ 현상이 SELECT를 할 때는 나타나지 않지만 SELECT … FOR UPDATE나 SELECT … LOCK IN SHARE MODE로 할 때 나타난다.
+                
+                왜냐하면 위 SELECT는 SELECT할 때 레코드에 쓰기 잠금을 걸어야 한다. 그런데 이전 버전의 데이터(언두 레코드)에는 쓰기 잠금을 걸을 수 없기 때문에 현재 데이터를 SELECT할 수밖에 없다. 따라서 PHANTOM READ 현상이 일어난다.
+    
+            - MVCC를 사용하지 않는 방식에서
+            
+                이 때는 앞에서도 말했듯이 공용 락을 사용하게 된다. 하지만 공용 락은 각각의 레코드에 걸리는 것이지 범위적으로 걸리는 것이 아니기 때문에 데이터가 추가되는 것은 막을 수 없다. 따라서 PHANTOM READ 현상이 일어난다.
+        
+            ---
+        
+        백은빈, 이성욱, Real MySQL 8.0 1권, 2쇄, 위키북스, 183p, 2022
+        
     - SERIALIZABLE
-        
-        한 트랙잭션에서 읽고 쓰는 레코드를 다른 트랜잭션에서는 절대 접근할 수 없다.
-        
-        위에 있는 모든 문제가 없지만 가장 동시 처리 성능이 떨어진다.
-        
-        하지만 innoDB 스토리지 엔진에서는 갭 락과 넥스트 키 락 덕분에 REAPEATABLE READ 수준에서도 이미 팬텀 리드가 발생하지 않기 때문에 굳이 사용할 필요는 없다.
-        
-        - innoDB는 어떻게 갭 락과 넥스트 키 락으로 팬텀 리드 문제를 없앴을까?
+
+    **간결한 설명**
+    
+    InnoDB에서는 한 트랜잭션이 읽고 있는 데이터에 대해서는 다른 트랜잭션도 읽기만 가능하고 쓰고 있는 데이터는 읽기도 불가능해진다.
+    
+    **상세한 설명**
+    
+    innoDB에서 모든 SELECT문은 SELECT … FOR SHARE로 변경된다.
+    
+    즉 공용 락을 걸게 된다. 따라서 한 트랜잭션이 데이터를 읽고 있을 때 다른 트랜잭션이 그 데이터를 읽을 수만 있고 다른 트랜잭션이 그 데이터를 변경할 수 없게 된다.
+    
+    또한 하나의 트랜잭션이 데이터를 쓰고 있다면 전용 락이 걸리게 되고 모든 SELECT는 공용락을 획득해야하기 때문에 읽으려고 해도 전용 락이 반환될 때까지 기다려야 한다.
+    
+    위에 있는 모든 문제가 없지만 가장 동시 처리 성능이 떨어진다.
+    
+    하지만 innoDB 스토리지 엔진에서는 갭 락과 넥스트 키 락 덕분에 REAPEATABLE READ 수준에서도 이미 팬텀 리드가 발생하지 않기 때문에 굳이 사용할 필요는 없다.
+
+    - InnoDB는 어떻게 갭 락과 넥스트 키 락으로 팬텀 리드 문제를 없앴을까?
+
+     넥스트 키 락은 레코드 락과 갭 락을 합친 것이다.
+
+     다음과 같은 쿼리가 있다고 하자.
+    
+       SELECT * FROM child WHERE id > 100 FOR UPDATE;
+    
+     이 때 갭 락은 id는 100을 넘는 모든 레코드들에 대해 잠금을 획득하며, id가 100이 넘는 레코드가 새로 생성되는 것을 막는다.
+    
+     따라서 팬텀 리드 현상이 사라진다.
+      
+     ---
+    
+     [https://dev.mysql.com/doc/refman/8.0/en/innodb-next-key-locking.html#:~:text=15.7.4-,Phantom Rows,-The so-called](https://dev.mysql.com/doc/refman/8.0/en/innodb-next-key-locking.html#:~:text=15.7.4-,Phantom%20Rows,-The%20so%2Dcalled)
+### 트랜잭션 Isolation Level이 생성, 수정, 삭제 등과도 관련이 있을까?
+    
+    관련 없다. 트랜잭션 Isolation Level은 트랜잭션끼리 변경하는 데이터를 볼 수 있냐 없냐에 관한 것이다.
+    
+    어떤 Isolation level에서도 하나의 트랜잭션에서 수정이 일어나면 lock이 걸리고 다른 트랜잭션은 만약 이 데이터에 수정 또는 삭제를 하고 싶다면 lock이 풀릴 때까지 기다려야 한다.
+    
+### 트랜잭션 isolation level과 lock은 무슨 관계가 있을까?
+    
+    각 Level의 특성을 달성하기 위해서 여러 종류의 Lock이 사용된다.
+    
+    예를 들어 REPEATABLE READ를 달성하기 위해서는 공용 락을 사용할 수 있으며,
+    SERIALIZABLE을 달성하기 위해서 배타적 락을 사용하게 된다.
 ### MVCC란?
-    
-    Multi Version Concurrency Control의 로 잠금을 사용하지 읂는 일관된 읽기를 제공하기 위해서 DBMS가 제공하는 기능이다.
-    
+    Multi Version Concurrency Control의 로 잠금을 사용하지 않는 일관된 읽기를 제공하기 위해서 DBMS가 제공하는 기능이다.
+
     만약 트랜잭션 격리 수준이 READ COMMITTED 이상일 경우에 업데이트된 레코드를 읽으면 기존 버전의 값을 조회하게끔해서 Dirty Read를 방지하는 것이 MVCC이다.
-    
-    이 기존 버전의 값은 innoDB 스토리지 엔진의 경우 언두 로그라는 공간에 보관되는데 트랜잭션이 완료되고 InnoDB 스토리지 엔진이 불필요하다고 판단하는 시점에 주기적으로 삭제한다.
-    
+
+    만약 MVCC를 제공하지 않는다면 READ COMMITTED isolation level을 달성하기 위해 읽기 할 때도 잠금(공용 락)을 사용해야 할 것 이다.
+
+    이 기존 버전의 값은 InnoDB 스토리지 엔진의 경우 언두 로그라는 공간에 보관되는데 트랜잭션이 완료되고 InnoDB 스토리지 엔진이 불필요하다고 판단하는 시점에 주기적으로 삭제한다.
+
     ---
-    
+
     백은빈, 이성욱, Real MySQL 8.0, 2쇄, 위키북스, 100-103, 2022
+
+### MySQL에 세션에서 Isolation Level을 설정할 때는 어떻게 쿼리들이 작용할까?
+    
+    하나의 세션에서 Isolation Level을 바꾸면 그 세션이 작업하는 데이터들은 모두 이 Isolation Level 아래에서 이루어진다.
+    
+    즉 한 세션이 자신의 Isolation Level을 Serializable이라고 정하고 특정 데이터를 읽는다면 다른 세션은 자신의 Isolation Level이 Repeatable Read임에도 불구하고 이 데이터를 수정하지 못한다.
