@@ -52,6 +52,48 @@
 ### 락을 사용해야 하는 이유는?
     
     트랜잭션이 동시적으로 수행될 때 문제가 없기 위해서
+
+### 어떤 방식으로 동작할까?
+    
+    락 매니저란 것이 존재하며 트랜잭션들은 이 락 매니저와 메시지를 주고 받는다.
+    
+    이를 테면 락을 얻고 싶다 락을 해제하고 싶다 등의 메세지를 보내면 락 매니저는 락 상황을 파악하고 허용하거나 대기시킨다.
+    
+    이 때 락 매니저는 lock table이란 것을 통해 이 작업을 진행한다.
+    
+    lock table은 해시테이블 자료구조로써 lock이 요청되는 데이터를 key로 갖는다.
+    
+    이 해시테이블에는 각 버켓마다 연결리스트가 들어 있고 해시 충돌이 난다면 seperate chaining 방식으로 해결한다.
+    
+    이 연결리스트에 모든 노드는 다음 정보를 갖고 있다.
+    
+    1. lock을 요청한 트랜잭션에 대한 정보
+    2. lock의 종류 (공용, 전용)
+    3. 현재 lock을 얻은 상태인지, 기다리는 상태인지
+    
+    - 위 그림을 보면 I23은 데이터를 나타낸다.
+    - T1과 T8은 현재 락이 허용된 트랜잭션 데이터고 T2는 아직 기다리는 트랜잭션 데이터다.
+    
+    **동작 방식**
+    
+    - Transaction이 Lock을 요청할 때
+        
+        어떤 트랜잭션이 lock을 요청하면 LockManager는 lock을 요청한 데이터의 인덱스에 있는 연결리스트에 추가한다.
+        
+        만약 요청한 데이터에 lock 걸려있지 않다면 lock을 얻게 해주고 lock이 걸려있더라도 걸려 있는 lock과 compatible한 lock이라면 lock을 얻게 해준다.
+        
+    - Transaction이 unlock을 요청할 때
+        
+        어떤 트랜잭션이 unlock을 요청할 경우 그 트랜잭션을 연결리스트에서 삭제하고 연결리스트에 연결된 다음 트랜잭션부터 순서대로 락 획득을 진행시킨다.
+        
+    - Transaction이 문제가 생겨서 롤백될 때
+        
+        LockManager는 이 트랜잭션이 잡고 있는 모든 락을 해제시키고 모든 연결리스트에서 이 Transaction을 제거한다.
+        
+    
+    ---
+    
+    Silberschatz, Database System Concepts, Seventh Edition, 844-846, 2020
     
 ### 락의 장점과 단점은?
     
@@ -85,7 +127,64 @@
         
         따라서 이 때는 모든 트랜잭션이 데이터 수정을 위한 SELECT를 할 때마다 SELECT … FOR UPDATE 구문을 통해 읽기를 할 때부터 전용 락을 걸어줄 필요가 있다.
         이렇게 할 경우 여러 트래잭션이 순서대로 진행되기 때문에 위와 같은 문제가 일어나지 않는다.
+### InnoDB는 인덱스 잠금을 한다는데 무슨 말일까?
+    
+    **간결** 
+    
+    레코드가 아닌 인덱스를 잠그기 때문에 어떤 실제 update가 일어나는 레코드와 상관없는 레코드를 수정하는 쿼리도 만약 같은 인덱스 데이터를 스캔하려한다면 기다려야 한다.
+    
+    **상세**
+    
+    다음과 같은 테이블이 있다고 해보자
+    
+    TABLE : Employee  Index first_name
+    
+    emp_no   first_name  last_name
+    1        jay         shin
+    2        jiwoo       shon
+    3        kan         tom
+    4        kang        utang
+    5        kim         vertex
+    6        lang        won
+    
+    이 때 다음과 같은 쿼리를 날린다고 해보자.
+    
+    update Employee set first_name= 'baby' where first_name='kan' and last_name = 'tom';
+    
+    이 때 innoDB는 인덱스를 통해 first_name이 ‘kan’인 데이터를 찾고 last_name이 ‘tom’인 값을 찾기 위해 아래에 모든 인덱스를 스캔할 것이다.
+    
+    이 때 emp_no 3, 4, 5, 6 을 가진 인덱스가 잠긴다.
+    
+    이 때 다음과 같은 쿼리들은 앞 쿼리가 잠금을 반환할 때까지 기다려야 한다.
+    
+    update Employee set first_name='big' where id = 4;
+    
+    update Employee set first_name='zoo' where id <= 6 and name = 'jiwoo';
+    
+    왜냐하면 이 두 쿼리는 모두 잠긴 인덱스를 스캔해야 하기 때문이다.
+    
+    첫 쿼리는 emp_no 4번을 스캔해야 하고, 두번째 쿼리는 6,5,4,3,2,1번을 스캔해야 한다.
+    
+    ---
+    
+    백은빈, 이성욱, Real MySQL 8.0 1권, 2쇄, 위키북스, 170-172p, 2022
+    
+    직접 2개의 커넥션을 이용해 테스트
+    
+    - 왜 인덱스 잠금을 할까? 그리고 다른 DB도 update를 위한 대상을 찾기 위해 스캔하는 모든 대상을 잠금하나?
         
+        인덱스 잠금을 하는 이유는 MySQL이 REAPEATABLE READ부터 뭔가 
+        
+    - 인덱스를 타지 않는 쿼리는?
+        
+        인덱스를 타지 않는
+        
+### MySQL에서 REPEATABLE READ isolation level과 READ COMMITED isolation level의 차이는 무엇이 있을까?
+    
+    일반적인 차이는 제외하고 중요한 차이점 2가지가 있다.
+    
+    1. 갭 락이 사용되지 않는다. 
+    2. 스캔된 인덱스 중 매칭되지 않은 row의 인덱스 잠금이 해제된다. 
 ### 락은 자동으로 얻어질까 수동으로 얻어야 할까?
     
     MySQL InnoDB는 삭제 또는 업데이트를 할 때 자동으로 락을 얻고 트랜잭션이 커밋되거나 롤백될 때 락을 해제한다.

@@ -122,3 +122,48 @@
     patch를 사용해야 한다. HTTP 메소드를 통해 의도를 정확히 드러내야 하므로 patch 수정을 나타내는 patch를 사용하는게 맞다.
     
     put을 사용하면 항상 수정된 데이터 뿐만 아니라 모든 데이터를 다 보내야 한다.
+
+### HTTP 1.0 vs HTTP1.1 vs HTTP2.0
+    - HTTP 1.0 → HTTP 1.1
+        - Host header가 생겼다.
+        - Persistent connections
+            
+            HTTP 1.0에서 서버와 클라이언트가 한번씩 요청과 응답을 주고 받고 연결을 끊는게 기본이다. 성능을 높히기 위해서 keep-alive라는 것이 비공식적으로 쓰였다.
+            
+            HTTP 1.1에서는 지속적인 연결이라고 해서 연결을 재사용해서 클라이언트가 원하는 리소스를 다 받을 때까지 어느정도 연결을 지속하는 기능을 기본으로 한다.
+            
+        - New methods
+            
+            PUT, PATCH, DELETE, CONNECT, TRACE, OPTIONS 등 새로운 메소드가 추가되었다.
+            
+    - HTTP 1.1 → HTTP 2.0
+        
+        성능 향상에 초점을 맞췄다.
+        
+        - Request Multiplexing
+            
+            그 전에는 지속적인 연결을 하더라도 하나의 요청을 보내고 응답을 받기 전에 요청을 보낼 수는 없었다. 따라서 HOL(Head-of-Line) Blocking 문제가 존재했다.
+            
+            그러나 HTTP 2.0부터는 하나의 연결에서 여러 요청을 한 번에 보내고 한 번에 받을 수 있다.
+            
+        - Server push
+            
+            서버가 능동적으로 클라이언트가 원하는 것을 예측해서 요청이 오지 않아도 리소스를 전달할 수 있다.
+            
+        - Request prioritization
+            
+            요청을 보낼 때 우선순위를 정할 수 있다. JS보다 CSS를 먼저 받을 수 있다.
+            
+            여러 요청을 동시에 보내기 때문에 생긴 기능이다.
+            
+    - HTTP 2.0 → HTTP 3.0
+        
+        이전과는 완전히 달라졌다.
+        
+        - TCP 프로토콜이 아닌 UDP 프로토콜을 사용
+        - 기본적으로 암호화해서 통신
+        
+    
+    ---
+    
+    [https://www.baeldung.com/cs/http-versions](https://www.baeldung.com/cs/http-versions)
