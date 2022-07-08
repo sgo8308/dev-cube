@@ -505,3 +505,38 @@
     4코어일 때 4쓰레드만 사용한다면 나머지 6개의 작업은 앞 작업이 끝날 때까지 기다려야 할 것이다.
     
     따라서 코어의 갯수에 맞춰서 쓰레드를 생성하는 것보다는 더 많은 쓰레드를 생성하는 것이다.
+## ThreadLocal
+### ThreadLoacl이란? ★
+        
+    쓰레드 로컬이란 각 쓰레드에서 사용할 수 있는 전역 변수라고 할 수 있다.
+        
+### ThreadLocal은 어디에 쓰일까?
+        
+    ThreadLocal은 한 쓰레드에서 실행되는 코드가 동일한 객체를 사용할 수 있도록 해 주기 때문에 쓰레드와 관련된 코드에서 파라미터를 사용하지 않고 객체를 전파하기 위한 용도로 주로 사용되며, 주요 용도는 다음과 같다.
+    
+    - 사용자 인증정보 전파 - Spring Security에서는 ThreadLocal을 이용해서 사용자 인증 정보를 전파한다.
+    - 트랜잭션 컨텍스트 전파 - 트랜잭션 매니저는 트랜잭션 컨텍스트를 전파하는 데 ThreadLocal을 사용한다.
+    - 쓰레드에 안전해야 하는 데이터 보관
+    
+    이 외에도 쓰레드 기준으로 동작해야 하는 기능을 구현할 때 ThreadLocal을 유용하게 사용할 수 있다.
+    
+    ---
+    
+    [https://javacan.tistory.com/entry/ThreadLocalUsage](https://javacan.tistory.com/entry/ThreadLocalUsage)
+        
+### ThreadLocal을 쓸 때 주의할 점은?
+        
+    쓰레드 풀 환경에서 ThreadLocal을 사용하는 경우 ThreadLocal 변수에 보관된 데이터의 사용이 끝나면 반드시 해당 데이터를 삭제해 주어야 한다. 그렇지 않을 경우 재사용되는 쓰레드가 올바르지 않은 데이터를 참조할 수 있다.
+        
+    ---
+        
+    [https://javacan.tistory.com/entry/ThreadLocalUsage](https://javacan.tistory.com/entry/ThreadLocalUsage)
+        
+### ThreadLocal이 코드로 어떻게 사용될까?
+        
+    public class Context {
+        public static ThreadLocal<Date> local = new ThreadLocal<Date>();
+    }
+        
+    위와 같이 ThreadLocal을 static 변수로 갖는 클래스를 만들고 이 클래스를 통해 쓰레드 마다 전역적으로 참조한다.
+        
