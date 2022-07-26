@@ -161,3 +161,80 @@
     [https://www.lambdatest.com/learning-hub/cicd](https://www.lambdatest.com/learning-hub/cicd)
     
     [https://www.devopsauthority.tech/2021/02/09/which-is-better-github-actions-circle-ci/](https://www.devopsauthority.tech/2021/02/09/which-is-better-github-actions-circle-ci/)
+
+
+# 고민
+
+### Mybatis에서 resultMap을 single join 방식을 쓸까 multiple select 방식을 쓸까?
+    
+    single join 방식이 더 성능이 좋기 때문에 single join 방식을 사용한다.
+    
+### 어노테이션은 어떤 순서로 놓는 것이 좋을까?
+    
+    중요한 것을 클래스에 가장 가깝게 두는 것이 좋다.
+    
+    예를 들어 다음과 같은 코드가 있을 때
+    
+    @Getter
+    @Service
+    public class Something{
+    }
+    
+    @Getter는 롬복의 어노테이션이고 필수적인 것은 아니다. 반면에 @Service는 스프링의 어노테이션으로 중요한 어노테이션이다. 만약 이런 식으로 구분해서 놓는다면 후에 kotilin 등의 새 언어 전환으로 롬복이 더 이상 필요없을 때 쉽게 제거할 수 있다.
+    
+    ---
+    
+    스프링 부트와 AWS로 혼자 구현하는 웹 서비스 89p
+    
+### Entity를 따로 관리하는게 좋을까? Dto로만 해결할까?
+    
+    Jpa와 달리 Mybatis에서는 Entitiy를 테이블로 매핑하지 않는다.
+    
+    하지만 Entity에 관한 작업들은 Entity가 주체를 갖고 처리해야지 service에서 모든 것들을 담당하는 것은 객체가 단순히 데이터 저장소에 역할만하게 되기 때문에 옳바르지 않다.
+    
+    service는 트랜잭션과 domain들의 실행순서를 조정하는 역할을 하고 실제 비즈니스 로직은 domain들이 담당하는 것이 좋다.
+    
+    결합도를 떨어트려 변경에 유연하게 해주기 때문이다.
+    
+    Repository에서는 실제 Entity로 받아오고 service에서 이 Entitiry로 작업한 후에 Controller로 넘겨줄 때는 Dto를 사용하여 넘겨주는 방식으로 하자. 왜냐하면 Controller는 View에 필요한 정보들에 맞춰 Dto가 구성되어야 하기 때문에 Entitiy만으로는 충분하지 않을 때가 있고 View 요구사항에 맞춰 Entity를 변경하는 것은 좋지 않다. 왜냐하면 View는 요구사항이 자주 바뀌며 Entity는 서비의 중심축에 있기 때문에 Entity가 변경된다면 많은 곳에 영향을 끼칠 수 있기 때문이다.
+    
+    ---
+    
+    스프링 부트와 Aws로 혼자 구현하는 웹서비스 100-108p
+    
+### 빌더 패턴을 사용하면 좋은 이유?
+    1. 클래스에 많은 필드가 존재하면서 항상 모든 필드가 필요한 것이 아닐 때가 있다.이 때 각 상황에 맞는 무수히 많은 생성자를 만드는 것은 낭비다. 빌더 패턴을 사용한다면 원하는 필드만 그 때 그 때 넣어서 생성할 수 있다.
+    2. 또한 내가 어떤 값을 넣는지 명확하게 알 수 있으므로 실수할 여지가 적다.
+        
+        public Something(String a, String b ){
+        }
+        
+        public static void main(){
+        	new Something("b", "a"); //이렇게 필요한 값을 거꾸로 넣어도 인지가 잘 안된다.
+        }
+        
+    3. 빈 생성자를 이용해서 만든 후 Setter로 넣어줄 수도 있지만, 필요한 객체가 만들어질 때까지 아직 덜 생성된 객체가 버젓이 생성되어 있는 셈이므로 멀티쓰레드 환경에서 불완전한 객체를 사용해서 문제가 될 가능성이 존재한다.
+    
+    ---
+    
+    스프링 부트와 Aws로 혼자 구현하는 웹서비스 91-94p
+    
+### 롬복에 빌더를 메소드에 붙힌 이유?
+    
+    Mybatis에서 매핑할 때 인자가 없는 생성자가 필요하다.
+    그런데 class 레벨에 builder를 붙히면 다른 생성자가 존재할 경우 제대로 작동하지 않기 때문에 메소드에 붙혔다.
+    
+### 중복체크, null 체크 같이 DB에서 제한할 수 있는 것들은 DB로 넘겨도 되지 않을까?
+    
+    애플리케이션 단에서도 체크해주는 것이 좋다. 
+    
+    1. 왜냐하면 비즈니스 로직 자체만으로 스펙과 요구사항을 분석할 수 있다.(유니크 처리는 DB에 맡기고, 다른 체크 로직은 자바 소스에서 하고 하면 파악하기가 관점에 따라 복잡할 수 있다.)
+    2. DB가 변경 될 일이 발생하더라도, 비즈니스 로직에만 집중할 수 있습니다. 예를 들면, 먼 훗날(현재는 그런 설계안이 아니지만) 유저 탈퇴 처리 시 DB에 1년동안은 정보를 보관해야하는 요구사항이 생겼습니다. 유저 데이터에 Status라는 값을 두고, 액티브 유저인지, 탈퇴 유저인지 판단해야하는 경우가 있을 수 있습니다.(실제로 이렇게 많이 하고, 법적으로 이런 필요가 많습니다.) 이럴 경우 DB의 unique인덱스를 제거하기 때문에 DB만으로 중복체크를 하던 부분에 문제가 발생한다. 만약 애플리케이션단에서도 체크해주고 있었다면 DB 변화에 관계없이 잘 동작할 것이다.
+    
+    ---
+    
+    derek 멘토님
+    
+### BaseException이 Exception이 아니라 RuntimeException을 상속하는 이유는?
+    
+    checked Exception은 모두 try catch로 잡아주어야 한다. 그러나 내가 직접 만드는 예외들은 거의 대부분 잡아서 해줄 것이 없다. 그냥 위로 날려보내서 ControllerAdvice가 처리하게끔 하는게 깔끔하다. 따라서 RuntimeException을 상속한다.
