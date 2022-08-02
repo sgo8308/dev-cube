@@ -237,4 +237,9 @@
     
 ### BaseException이 Exception이 아니라 RuntimeException을 상속하는 이유는?
     
-    checked Exception은 모두 try catch로 잡아주어야 한다. 그러나 내가 직접 만드는 예외들은 거의 대부분 잡아서 해줄 것이 없다. 그냥 위로 날려보내서 ControllerAdvice가 처리하게끔 하는게 깔끔하다. 따라서 RuntimeException을 상속한다.
+    checked Exception은 모두 try catch로 잡아주어야 한다. 그러나 내가 직접 만드는 예외들은 거의 대부분 잡아서 해줄 것이 없다. 
+    그냥 위로 날려보내서 ControllerAdvice가 처리하게끔 하는게 깔끔하다. 따라서 RuntimeException을 상속한다.
+
+### 잘못된 인풋으로 Controller에서 @RequestBody가 붙어 있는 클래스에 JsonMapping 실패시 어떻게 처리할까?
+    잘못된 인풋이 여러개라도 하나만 알려준다. 여러개 모두를 알려주기엔 구현 난이도가 높고 공수 대비 효과가 크지 않기 때문이다. 
+    왜냐하면 UI단에서 충분히 옳바른 타입으로 유도할 수 있고 여러 인풋이 한번에 잘못된 타입으로 요청할 일이 거의 없기 때문이다.
