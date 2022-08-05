@@ -100,6 +100,7 @@
 ### 락의 장점과 단점은?
     
     동시적인 트랜잭션에서 발생할 수 있는 문제를 해결해 줄 수 있지만 동시에 성능을 떨어트릴 수 있다.
+## 비관적 락 낙관적 락
     
 ### 비관적 락과 낙관적 락이란? ★
     
@@ -129,6 +130,86 @@
         
         따라서 이 때는 모든 트랜잭션이 데이터 수정을 위한 SELECT를 할 때마다 SELECT … FOR UPDATE 구문을 통해 읽기를 할 때부터 전용 락을 걸어줄 필요가 있다.
         이렇게 할 경우 여러 트래잭션이 순서대로 진행되기 때문에 위와 같은 문제가 일어나지 않는다.
+### DB 관련해서 낙관적 락은 어떻게 구현할까?
+    
+    Select id, balance, version from account where id="1";
+    Query results: id=1, balance=1000, version=1
+    
+    Update the account
+    Set the balance = the balance + 100, version = version + 1
+    Where id = "1" and version = 1
+    
+    위와 같이 version 정보를 사용하는데, select할 때와 동일한 버전일 때만 update하게 되고 그렇지 않을 경우 실패하게 된다. 실패하는 경우 보통 아예 요청을 실패시키며 될 때까지 시도할 수도 있다.
+    
+    또한 Java의 Atomic 객체에서 CAS 알고리즘에 낙관적 락이 사용되며 이 때는 될 때가지 시도한다.[[2]](https://accessun.github.io/2017/03/12/Optimistic-locking-and-CAS-algorithm/#:~:text=Optimistic%20locking%20in%20Java%20is%20implemented%20using%20an%20algorithm%20called%20CAS%2C%20which%20is%20%E2%80%9CCompare%2DAnd%2DSet%E2%80%9D%20or%20%E2%80%9CCompare%2DAnd%2DSwap%E2%80%9D.%20By%20using%20this%20algorithm%2C%20programs%20no%20longer%20have%20to%20lock%20up%20the%20whole%20critical%20section.%20It%20just%20attempts%20to%20update%20the%20shared%20resource.)
+    
+    ---
+    
+    코드 참고 : [https://topic.alibabacloud.com/a/mybatis-how-to-use-optimistic-locks_8_8_31118982.html](https://topic.alibabacloud.com/a/mybatis-how-to-use-optimistic-locks_8_8_31118982.html)
+
+### 각각의 장단점은 무엇이고 언제 어떤 것을 쓰는 것이 좋을까?
+    - 낙관적 락
+        - 장점
+            1. 낙관적 락은 락을 걸지 않기 때문에 병목이 발생하지 않아 성능에 좋다.
+        - 단점
+            1. conflict가 발생하면 요청이 실패되거나 또는 재시도를 위한 로직을 새로 짜야한다.
+            2. conflict가 발생할 때 마다 앞서 진행된 수정사항이 있다면 롤백이 일어나야 하고 새로 트랜잭션을 실행해야 한다. conflict가 자주 발생하게 되면 이는 심각한 성능 저하를 초래한다.
+        
+        ⇒ 동시성 문제가 발생하긴 하지만 정말 가끔 발생할 때 좋다. 왜냐하면 자주 발생하면 자주 실패가 발생한다.
+            만약 요청이 아예 실패되게끔 구현했으면 사용자 경험이 안 좋아지고, 재시도하게끔 구현했으면 계속해서 재요청하게 되므로 mysql서버에 부하가 많이 갈 수가 있고 네트워크를 많이 사용하게 된다.
+        
+    - 비관적 락
+        - 단점
+            1. 데드락의 문제가 있을 수 있다.
+            2. 경합이 발생하지 않아도 매번 락을 획득하고 릴리즈해주어야 해서 성능상 좋지 않다.
+            3. 다른 트랜잭션들이 기다려야 하기 때문에 병목이 생길 수 있다. 낙관적 락을 경합시 실패시키게 하면 병목이 안생기게 할 수 있다.
+            
+    
+    ⇒ 낙관적 락은 동시적인 트랜잭션이 적게 일어나는 곳에서 사용하고 비관적 락은 많이 일어나는 곳에서 사용한다. 왜냐하면 동시적인 트랜잭션이 적을 때는 낙관적 락이 성능상 유리하고 많을 때는 비관적 락이 유리하기 때문이다. 하지만 비관적 락은 데드락의 위험이 있기 때문에 주의해서 사용해야 한다.
+    
+    ---
+    
+    [https://ko.wikipedia.org/wiki/낙관적_병행_수행_제어](https://ko.wikipedia.org/wiki/%EB%82%99%EA%B4%80%EC%A0%81_%EB%B3%91%ED%96%89_%EC%88%98%ED%96%89_%EC%A0%9C%EC%96%B4)
+---
+## 분산 락
+### 정의는?
+    
+    하나의 머신이 아니라 여러 머신에서 하나의 자원을 상호 배타적으로 사용해야 할 때 이용하는 락. 
+    
+### 어떻게 구현할까?
+    
+    여러 서버에서 MySQL에 있느 어떤 공유 자원을 업데이트 한다고 해보자.
+    
+    - MySQL에 Lock용 테이블을 따로 만들기.
+        
+        A라는 작업을 한다고 해보자. A 작업을 하려면 이 Lock용 테이블에 접근해서 work라는 필드에 A라는 값을 가진 레코드를 생성해야 한다. 이 때 이 work라는 필드에 unique제약조건을 걸어준다.
+        
+        처음 record를 집어넣은 트랜잭션만 작업을 수행할 수 있다. 그렇지 않은 트랜잭션은 insert하기 위해 기다리거나 아니면 락을 얻는 트랜잭션과 작업 트랜잭션이 분리되어 있을 경우에는 unique제약 조건에 걸려서 insert에 실패하게 됨으로써 요청이 실패하게 된다. 
+        
+        lock을 해제할 때는 insert했떤 A레코드를 삭제해준다.
+        
+        ---
+        
+        [https://programmer.ink/think/principle-and-implementation-of-distributed-lock.html#:~:text=To create a database table%3A](https://programmer.ink/think/principle-and-implementation-of-distributed-lock.html#:~:text=To%20create%20a%20database%20table%3A)
+        
+    - MySQL에 네임드락 사용하기
+        
+        A라는 작업을 한다고 해보자. A라는 이름을 가진 네임드락을 얻어야 이 작업을 할 수 있게 구성한다. 
+        
+        ---
+        
+        [https://techblog.woowahan.com/2631/](https://techblog.woowahan.com/2631/)
+        
+    - Redis 사용하기
+        
+        A라는 작업을 수행하려면 Redis에 먼저 접근해서 A라는 Key을 가진 데이터를 생성한다. 누군가 이미 생성했다면 계속해서 다시 요청할 수도 있으며(스핀락) 기다렸다가 Redis가 락을 얻을 수 있다고 통지해주면 그 때 다시 요청할 수도 있다.(pub/sub)
+        
+        Redis를 이용한 방식은 lock에 사용된 key가 일정시간이 지나면 사라지게끔 할 수 있어서 데드락을 회피하는데 도움을 주고 락을 기다리는 다른 트랜잭션들의 Timeout시간을 정해주기가 쉬워서 마찬가지로 데드락을 피하는데 도움을 준다.
+        
+        ---
+        
+        [https://hyperconnect.github.io/2019/11/15/redis-distributed-lock-1.html](https://hyperconnect.github.io/2019/11/15/redis-distributed-lock-1.html)
+---
 ### InnoDB는 인덱스 잠금을 한다는데 무슨 말일까?
     
     **간결** 

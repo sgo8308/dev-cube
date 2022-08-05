@@ -64,3 +64,112 @@
     
     도메인 특화적인 코드만 남김으로써 클래스가 무엇을 하는지 명확하게 알 수 있다.
 
+### 롬복은 어떤 원리로 작동할까? ★
+    - Main
+        
+        컴파일 시점에 바이트 코드를 다시 조작해서 코드를 만들어낸다.
+        
+    - Sub
+        
+        javac은 컴파일시 다음과 같은 사전 단계를 거친다.
+        
+        1. 소스 파일은 파싱하여 AST(Abstract Syntax Tree)를 만든다.
+        2. 어노테이션 프로세싱 과정을 거치면서 AST가 수정된다.
+        
+        이후 수정된 AST를 javac이 컴파일하게 된다.
+        
+        lombok은 2번 과정에서 관여를 한다. 
+        
+        먼저 어노테이션 프로세싱 과정에서 프로세서로 롬복 어노테이션 프로세서가 선택된다.
+        
+        이 프로세서는 롬복 어노테이션 핸들러에게 AST 오브젝트를 넘긴다.
+        
+        롬복 어노테이션 핸들러는 AST 오브젝트에  다른 노드(메소드나 필드나 표현)들을 삽입한다. (@Getter라면 Getter메소드에 맞는 노드들을 삽입)
+        
+    
+    ---
+    
+    [http://notatube.blogspot.com/2010/12/project-lombok-creating-custom.html](http://notatube.blogspot.com/2010/12/project-lombok-creating-custom.html)
+    
+### 주의해야할 롬복 어노테이션은 어떤게 있을까?
+    - @ToString, @EqualsAndHashCode
+        - @ToString, @EqualsAndHashCode 공통
+            
+            상호 참조하는 클래스에서 둘 다 이 어노테이션을 사용할 경우 무한루프가 될 수 있다.
+            
+            @EqualsAndHashCode
+            @ToString
+            class A{
+                B b;
+            }
+            
+            @EqualsAndHashCode
+            @ToString
+            class B{
+                A b;
+            }
+            
+            이 경우 A에서 toString()을 호출하면 그 안에서 B의 toString()을 호출하는데 이 안에서는 다시 A의 toString()을 호출하는 식으로 무한루프에 빠진다.
+            
+            @EqualsAndHashCode도 마찬가지다.
+            
+            - 테스트 코드
+                1. @ToString
+                    
+                    public class LearningTest {
+                    
+                        public static void main(String[] args) {
+                            A a = new A();
+                            B b = new B();
+                            b.setA(a);
+                            a.setB(b);
+                    
+                            System.out.println(a.toString()); // 무한루프 발생
+                        }
+                    }
+                    
+                    @Data
+                    class A{
+                        public B b;
+                    }
+                    
+                    @Data
+                    class B {
+                       public A a ;
+                    
+                    }
+                    
+                2. @EqualsAndHashCode
+                    
+                    public class LearningTest {
+                    
+                        public static void main(String[] args) {
+                            A a = new A();
+                            B b = new B();
+                            b.setA(a);
+                            a.setB(b);
+                    
+                            A a2 = new A();
+                            B b2 = new B();
+                            b2.setA(a2);
+                            a2.setB(b2);
+                    
+                            System.out.println(a.equals(a2)); // 무한루프 발생
+                        }
+                    }
+                    
+                    @Data
+                    class A{
+                        public B b;
+                    }
+                    
+                    @ToString
+                    @EqualsAndHashCode
+                    class B {
+                       public A a ;
+                    }
+                    
+    - AllArgsContstructor, RequiredArgsConstructor
+        
+        리팩토링하면서 필드의 순서를 바꿀 경우 롬복은 바뀐 순서에 맞게 새로운 생성자를 생성할 것이다.
+        하지만 기존 생성자를 사용하던 코드는 자동으로 변환이 안되기 때문에 문제가 생길 수 있다.
