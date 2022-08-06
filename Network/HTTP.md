@@ -73,6 +73,28 @@
     ---
     
     김영한, 모든 개발자를 위한 HTTP 웹 기본 지식, 인프런
+
+### 상태코드를 선택할 때 지켜야하는 것들을 어떤게 있을까?
+    - 2xx, 3xx 등등의 맥락을 제대로 알고 사용해야 한다.
+
+    - 요청이 실패한 경우2xx대로 내리고 바디에 실패 내용을 전달하지 않는다.
+        
+        프론트엔드 쪽에서 다음처럼 추가적으로 작업해줘야 한다. 
+        
+        async function fetchUsers () {
+          try {
+            const response = await fetch('/api/users/123');
+            const { success } = await response.json();
+            if (!success) {  // 추가 작업
+              throw new Error();
+            }
+          } catch (e) {
+            alert('요청이 실패했어요');
+          }
+        }
+    ---
+
+    https://evan-moon.github.io/2020/03/15/about-http-status-code/#:~:text=%EB%B0%B1%EC%97%94%EB%93%9C%EB%8A%94%20%EC%9E%98%20%EB%AA%A8%EB%A5%B4%EB%8A%94%20%ED%94%84%EB%A1%A0%ED%8A%B8%EC%97%94%EB%93%9C%EC%9D%98%20%EC%8A%AC%ED%94%88%20%EC%82%AC%EC%A0%95
     
 ### content negotiation에 대해서 설명해주세요 
     
