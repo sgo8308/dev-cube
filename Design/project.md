@@ -17,6 +17,100 @@
     ---
     
     [https://terms.naver.com/entry.naver?docId=849375&cid=50371&categoryId=50371]
+
+## JWT
+### JWT란 무엇이고 어떻게 구성되어 있을까?
+    
+    Json Web Token의 줄임말로 클라이언트가 이 토큰을 이용해 서버에 인증할 수 있다. 
+    
+    `HEADER.PAYLOAD.SIGNATURE` 형태로 구성되어 있다.
+    
+    - 헤더
+        
+        시그니쳐를 만들 때 사용된 알고리즘과 JWT타입이 적혀 있다.
+        
+        {
+          "alg": "HS256",
+          "typ": "JWT"
+        }
+        
+    - PALOAD
+        
+        유저에 대한 정보와 토큰의 만료 시간 등이 적혀 있다. [Standard field](https://en.wikipedia.org/wiki/JSON_Web_Token#:~:text=database%20multiple%20times.-,Standard%20fields,-%5Bedit%5D)의 필드를 사용하거나 사용자가 정의한 필드를 사용한다.
+        
+        {
+          "sub": "1234567890",
+            "loggedInAs": "admin", // 권한
+          "name": "John Doe", // 유저 이름
+          "iat": 1516239022 // 토큰이 생성된 시간
+        }
+        
+    - SIGNATURE
+        
+        헤더와 페이로드를 서버의 비밀키를 이용해서 암호화한 암호문이 들어간다.
+        
+        HMACSHA256(
+          base64UrlEncode(header) + "." +
+          base64UrlEncode(payload),
+          secret // 비밀키
+        )
+        
+    
+    최종 JWT 생성
+    
+    **`const jwt** = base64urlEncoding(header) + '.' + base64urlEncoding(payload) + '.' + base64urlEncoding(signature)`
+    
+    `=>` 
+    
+    `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.kXvDp1PP_ndNG3MhIq1jvfvT6nfdGHW2xEZ5gFgo95A`
+    
+    ---
+    
+    [https://en.wikipedia.org/wiki/JSON_Web_Token](https://en.wikipedia.org/wiki/JSON_Web_Token)
+    
+### JWT를 이용한 로그인은 어떻게 동작할까?
+    
+    서버는 유저가 로그인하면 로그인 정보를 확인한 후 JWT 토큰을 만들어서 내려보낸다. 유저는 매 요청마다 JWT 토큰을 함께보낸다.
+    
+    서버는 HEADER.PAYLOAD와 비밀키를 이용해 HEADER에 있는 알고리즘으로 암호문을 생성한다. 생성된 암호문과 SIGNATURE를 비교해서 둘이 동일하면 위변조되지 않은 것이므로 이 JWT토큰이 유효하다고 판단한다.
+    
+    그 후 JWT에 적힌 내용을 이용해(유저 아이디나 권한) 처리를 진행한다.
+    
+### JWT 방식의 문제점은 무엇이고 어떻게 해결할까?
+    - 문제점
+        
+        토큰이 탈취당하면 유효기간동안 해커가 마음대로 로그인할 수 있으며 탈취된 사실을 알아도 토큰을 만료시킬 수 있는 방법이 없다.
+        
+    - 해결 방법
+        
+        access token의 만료 시간을 짧게 준다.
+        
+        - 문제점
+            
+            access token의 만료 시간을 짧게 주면 유저가 계속해서 로그인을 다시해주어야 하는 불편함이 있다.
+            
+            - 해결방법
+                - access token의 만료 시간을 짧게 주고 만료 시간이 긴 refresh token을 같이 사용한다.
+                    
+                    서버는 사용자에게 access token과 refresh token을 같이 발급한다. 사용자는 access token이 만료되면 refresh token을 같이 서버로 보내고 서버는 refresh token을 자신이 갖고 있는 refresh token과 비교하여 유효한지 확인하고 access token을 갱신해준다. 이렇게 함으로써 만약 access token이 탈취당하더라도 유효시간이 짧기 때문에 해커가 사용하기가 어렵고 refresh token이 탈취당하면 서버가 자신이 갖고 있는 refresh token을 만료시킴으로써 대응할 수 있다.
+                    
+                    또한 refresh token은 access token보다 훨씬 덜 보내지므로 탈취 가능성을 줄일 수 있다.
+                    
+                    - 어떻게  탈취 당한 사실을 알아낼까?
+                        1. Refresh Token은 한 번만 사용하게하고 매번 Refresh Token도 재발급해주기 (RTR 방식)
+                            
+                            해커가 Refresh Token을 탈취한 후 사용하려하면 이미 한 번 사용된 Refresh Token이 재사용되는 것이므로 탈취당했다는 사실을 알 수 있다. [출처](https://developer-ping9.tistory.com/239#:~:text=%C2%A0%20%C2%A0%20%C2%A0*-,%5BRTR%20%EA%B8%B0%EB%B2%95%EC%97%90%20%EB%8C%80%ED%95%9C%20%EC%A7%A4%EB%A7%89%EC%A0%95%EB%A6%AC%5D,-Refresh%20Token%20%EC%9D%84)
+                            
+                        2. IP 주소를 확인하기 [출처](https://okky.kr/article/1007579#:~:text=IP%20%EC%A3%BC%EC%86%8C%EB%A1%9C%20%EC%9A%94%EC%B2%AD%EC%9D%B4%20%EB%93%A4%EC%96%B4%EC%99%94%EB%8B%A4%EB%8D%98%EA%B0%80%20%EB%98%90%EB%8A%94)
+                    - 문제점
+                        1. 서버에 refresh token을 보관하는 storage를 따로 만들어야 한다. jwt의 장점이 완전히 사라진다.
+                        2. 클라이언트가 AccessToken의 만료에 대한 연장 요청을 구현해야 한다.
+                - Sliding Session 전략사용하기
+                    
+                    사용자가 유효한 access token을 들고 접근할 때마다 access token의 만료 시간을 되돌려주는 것이다. 매 요청마다 돌려주진 않고 글을 쓸 때나 결제할 때와 같이 특별히 세션 유지가 필요한 순간에 돌려준다. 만약 만료 시간이 30분으로 설정되어 있는데 사용자가 5분 남은 access token을 사용하면 다시 30분으로 돌려준다.
+                    
+                    이렇게하면 사용자가 지속적으로 서비스를 사용하는 동안은 중간에 다시 로그인하지 않아도 되며 탈취된 토큰은 해커가 바로 사용해서 지속적으로 access token의 만료시간을 갱신해주지 않는 이상 곧 만료가 되므로 유저의 편희성과 보안 둘 다 어느정도 향상시킬 수 있다.
+
 ## 패스워드 암호화
 ### 패스워드는 왜 DB에 암호화해서 저장해야할까?
 
