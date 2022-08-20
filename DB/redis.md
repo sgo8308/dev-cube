@@ -104,12 +104,15 @@
     [https://deveric.tistory.com/65?category=346637#:~:text=Memcached가 유리합니다.-,Redis는,-Copy%26Write 방식을](https://deveric.tistory.com/65?category=346637#:~:text=Memcached%EA%B0%80%20%EC%9C%A0%EB%A6%AC%ED%95%A9%EB%8B%88%EB%8B%A4.-,Redis%EB%8A%94,-Copy%26Write%20%EB%B0%A9%EC%8B%9D%EC%9D%84)
     
 ### vs Memcached
-    
+
     Redis는 Memcached가 제공하는 모든 기능을 제공하고 있으나 Memcahced는 Redis가 할 수 없는 것들이 있다. 
     대표적으로 다양한 자료구조와 장애가 생겼을시 복구하는 기능이다. 
-    
-    Redis는 대신에 성능에서 약간 손해를 본다. Copy on Write 때문에 메모리를 좀 더 필요할 수 있으며 메모리 파편화 현상으로 안정적인 응답 속도가 나오지 않을 수 있다. 
+    Memcached는 String 자료구조만 지원하며 Consistent Hashing 기능을 사용하여 여러 Memcached 서버에 자료를 분산 저장이 가능하지만
+    서버에 장애가 생겼을 경우 그 Memcached 서버에서 저장되고 있는 데이터는 잃어버릴 수 밖에 없다.
+
+    Redis는 대신에 성능에서 약간 손해를 본다. Copy on Write 때문에 메모리를 좀 더 필요할 수 있으며 메모리 파편화 현상으로 대규모 트래픽이 발생할 시 안정적인 응답 속도가 나오지 않을 수 있다.
     또 싱글쓰레드이기 때문에 Scale Up시 여러 코어들을 많이 활용하기 힘들다.
-    
-    그러나 그 차이들을 미미하며 Redis는 또한 많은 사용자와 문서가 있기 때문에 웬만한 프로젝트에서는 Redis를 사용하는 것이 좋다고 생각된다.
+
+    사실상 Redis와 Memcahced의 성능차이는 미미하다. Redis는 스프링 부트에서도 지원해주고 있어 개발과 유지보수가 편리하고, 
+    장애 관련 기능으로 인해 Memcached보다 가용성이 좋다. 따라서 Redis를 사용하는 것이 좋다고 생각된다.
     
