@@ -23,3 +23,14 @@ public class Config {
 
 [참고](https://docs.spring.io/spring-session/docs/2.5.6/reference/html5/guides/boot-redis.html#:~:text=Session%20store%20type.-,Under%20the%20hood%2C,-Spring%20Boot%20applies)
 [참고](https://docs.spring.io/spring-boot/docs/2.5.12/reference/htmlsingle/#features.nosql.redis.connecting:~:text=7.12.1.-,Redis,-Redis%20is%20a)
+
+
+### RedisTemplate은 뭘까?
+    
+#복잡 #귀찮음
+
+원래는 RedisConnection을 이용해서 연산들을 하고 Connection을 닫아주고 해야한다. 이 때 직렬화도 직접 해야하며 RedisConnection을 이용한 방식은 key와 value로 byte[]만 받는다.
+
+RedisTemplate은 커넥션과 관련된 부분을 템플릿화 해주며 직렬화와 같은 부분은 원하는 전략을 주입받아 사용할 수 있게끔 구성되어 있다. 따라서 더 쉽게 Redis관련된 작업을 할 수 있도록 도와준다.
+
+정리하자면 RedisConnection은 Low Level을 다루기 때문에 **복잡**하고 반복 작업 많아  **귀찮다.** RedisTemplate은 직렬화와 커넥션 관리 같은 복잡하고 귀찮은 작업을 템플릿 콜백 패턴을 통해 완화시켜주는 클래스다.
