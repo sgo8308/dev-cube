@@ -147,6 +147,72 @@
     ---
     
     [https://docs.oracle.com/javase/8/docs/technotes/guides/io/enhancements.html](https://docs.oracle.com/javase/8/docs/technotes/guides/io/enhancements.html)
+
+### NIO를 이용한 서버는 어떤식으로 작동할까?
+    
+    요약 : while문을 돌면서 Selector를 통해 I/O Operation이 준비된 채널들을 기다리고 준비된 채널이 있다면 그에 맞는 작업을 진행해준다.
+    
+    public class EchoServer {
+    
+        private static final String POISON_PILL = "POISON_PILL";
+    
+        public static void main(String[] args) throws IOException {
+            Selector selector = Selector.open();  // Selector 열기
+            ServerSocketChannel serverSocket = ServerSocketChannel.open(); // 서버소켓을 열고 세팅해주기
+            serverSocket.bind(new InetSocketAddress("localhost", 5454));
+            serverSocket.configureBlocking(false);
+            serverSocket.register(selector, SelectionKey.OP_ACCEPT);
+            ByteBuffer buffer = ByteBuffer.allocate(256); // 데이터를 읽고 쓸 버퍼 생성
+    
+            while (true) {
+                selector.select(); // selector가 주시하는 채널들로부터 이벤트 확인
+                Set<SelectionKey> selectedKeys = selector.selectedKeys(); // 이벤트가 일어난 채널을 갖고 있는 key 갖고오기 
+                Iterator<SelectionKey> iter = selectedKeys.iterator();
+                while (iter.hasNext()) { // 루프를 돌면서 이벤트에 따라 처리해주기
+    
+                    SelectionKey key = iter.next();
+    
+                    if (key.isAcceptable()) {
+                        register(selector, serverSocket); // 클라이언트와 연결이 되면(accept) 클라이언트 소켓 채널을 만들고 selector에 등록
+                    }
+    
+                    if (key.isReadable()) {
+                        answerWithEcho(buffer, key); // 데이터를 읽을 수 있다면 읽어서 echo해주기
+                    }
+                    iter.remove();
+                }
+            }
+        }
+    
+        private static void answerWithEcho(ByteBuffer buffer, SelectionKey key)
+          throws IOException {
+     
+            SocketChannel client = (SocketChannel) key.channel();
+            client.read(buffer);
+            if (new String(buffer.array()).trim().equals(POISON_PILL)) {
+                client.close();
+                System.out.println("Not accepting client messages anymore");
+            }
+            else {
+                buffer.flip();
+                client.write(buffer);
+                buffer.clear();
+            }
+        }
+    
+        private static void register(Selector selector, ServerSocketChannel serverSocket)
+          throws IOException {
+     
+            SocketChannel client = serverSocket.accept();
+            client.configureBlocking(false);
+            client.register(selector, SelectionKey.OP_READ);
+        }
+    
+    SelectionKey는 말그대로 열쇠와 같다. Selector에 채널들을 등록하면 얻을 수 있으며 SelectionKey로부터 등록과 관련된 다양한 정보를 얻을 수 있다. 예를들면 연결된 채널이나 Selector를 얻을 수 있고 key에 원하는 오브젝트를 붙여줄 수도 있다.
+    
+    ---
+    
+    [https://www.baeldung.com/java-nio-selector](https://www.baeldung.com/java-nio-selector)
     
 ### IO와 NIO의 차이점은?
     - IO는 입출력 방식으로 스트림을 사용하고 NIO는 채널을 사용한다.
