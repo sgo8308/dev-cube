@@ -314,6 +314,15 @@
     ---
     
      백은빈, 이성욱, Real MySQL 8.0 2권, 2쇄, 위키북스, 400p, 2022   
+
+### 왜 모든 테이블에 생성 시각과 최근 업데이트 시각 필드를 포함하는게 좋을까?
+    1. 시간을 이용해서 디버깅 하기가 용이하다.
+    2. 향후 데이터 아카이브를 구현할 수 있다. (?)
+    3. 중요한 회계 정보를 제공할 수 있다.(?)
+    
+    ---
+    
+    [https://blog.dionbeetson.com/2014/06/why-every-database-table-should-have.html](https://blog.dionbeetson.com/2014/06/why-every-database-table-should-have.html)
 ## 키
 ### 자연키 vs 인조키
     - 자연키
