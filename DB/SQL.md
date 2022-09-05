@@ -83,6 +83,35 @@
     ---
     
     [https://sqlbolt.com/lesson/select_queries_order_of_execution#:~:text=Because each part of the,what results are accessible where](https://sqlbolt.com/lesson/select_queries_order_of_execution#:~:text=Because%20each%20part%20of%20the,what%20results%20are%20accessible%20where).
+
+### SELECT length FROM t ORDER BY title은 왜 가능하고 SELECT DISTINCT length FROM t ORDER BY title은 왜 안될까?
+    
+    `SELECT length FROM t ORDER BY title`은 다음과 같은 순서로 진행된다.
+    
+    1. FROM t 로 t 테이블을 가지고 옴
+    2. legnth와 title을 select함. 이 때 title은 extended sort key columns라고 해서 ORDER BY를 위해 임시로 추가됨
+    3. title로 정렬 함
+    4. title을 제거하고 length만 남김
+    
+    2번에서 extended sort key columns로 title이 추가되기 때문에 이 SQL이 가능하다.
+    
+    한 편 `SELECT DISTINCT length FROM t ORDER BY price` 은 다음과 같은 순서로 진행된다.
+    
+    1. FROM t로 t 테이블을 가지고 옴
+    2. length와 price을 select함.
+    3. distinct로 length와 price을 묶어서 중복을 없앰.
+    4. price로 정렬함.
+    5. price을 제거하고 length만 남김
+    
+    이 때 3번 과정이 우리가 실제로 원하는 것과는 다른 결과를 만든다. 우리가 원한 것은 length의 중복을 제거하고 싶은 것이지만 3번을 수행한 후에는 length의 중복이 제거되지 않는다.
+    
+    또한 상식적으로 결정할 수 없는 문제가 하나 더 있다. 만약 같은 length를 가진 애들이 서로 다른 price를 가지고 있다면 distinct를 했을 때 어떤 price를 남겨서 order by를 적용할지 DB가 알 수 없다.
+    
+    따라서 이러한 SQL은 허용하지 않는다.
+    
+    ---
+    
+    [https://dzone.com/articles/how-sql-distinct-and-order-by-are-related](https://dzone.com/articles/how-sql-distinct-and-order-by-are-related)
     
 ## LIMIT
 ### LIMIT의 동작 원리는?
