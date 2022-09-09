@@ -137,3 +137,27 @@ xml 설정을 보면 이해가 쉽다.
 ---
 
 토비의 스프링 6.3.4
+
+### 프록시 팩토리 빈은 무엇이고 팩토리 빈을 직접 구현하는 것과 비교하여 어떤 문제를 해결해줄까?
+  
+#재사용 #확장
+
+팩토리 빈을 직접 구현하여 다이내믹 프록시를 적용하는 방법은 InvocationHandler를 구현한 TransactionHandler와 같은 것들을 모든 팩토리 빈에서 생성해주어야 한다. 왜냐하면 TransactionHandler가 target 클래스를 직접 참조하고 있기 때문이다.  
+
+또한 어떤 메소드에 이 부가기능을 적용할지에 대한 알고리즘이 각 부가기능 로직을 가진 InvocationHandler마다 중복해서 적어주어야 한다.
+
+스프링에서 제공하는 ProxyFactoryBean을 이용하면 이 단점을 극복할 수 있다. 
+
+이 ProxyFactoryBean은 InvocationHandler대신 비슷한 역할을 하는 MethodInterceptor라는 것을 사용한다. 그리고 MethodInterceptor는 Invoke메소드의 파라미터로 Method 대신 MethodInvocation을 받는다. MethodInvocation은 자신이 직접 target를 참조하고 위임하는 역할을 하게 된다. MethodInterceptory는 일종의 템플릿이 되고 MethodInvocation은 콜백인 셈이다. 이로 인해 MethodInterceptor는 순수하게 부가 기능을 더해주는 역할만 하게 되고 target으로부터 자유로워진다.
+
+따라서  MethodInterceptor를 스프링의 빈으로 등록하고 재사용할 수 있다. MethodInterceptor는 Advice라는 인터페이스를 상속하며 이로 인해 ‘Advice’라고 불린다.
+
+한 편 클래스의 어떤 메소드를 선택할지 정하는 부분 또한 InvocationHandler에서 구현하고 있었는데, InvocationHandler를 대신하는 MethodInterceptor가 스프링 빈으로 싱글톤의 형태로 등록됨으로써 위 기능을 할 수가 없어졌다. 공유 객체가 하나의 클래스에 의존하는 기능을 가질 순 없기 때문이다. 때문에 어떤 메소드에 부가 기능을 적용할지 선택하는 클래스로 따로 불리해냈고 이를 ‘Pointcut’이라고 부른다. 
+
+Advice와 Pointcut을 조합하여 사용하게 됨으로써 위에서 제시했던 메소드 선택 알고리즘 중복 문제 또한 해결하게 되었다.
+
+Advice는 단독으로 전달되거나 Pointcut과 묶여서 Advisor의 형태로 전달된다.
+
+---
+
+토비의 스프링 6.4
