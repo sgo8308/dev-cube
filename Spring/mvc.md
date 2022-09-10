@@ -213,6 +213,20 @@
     //itemId는 url에 사용되었고 사용되지 않은 status는 쿼리파라미터의 형태로 붙는다.
     // ex.  http://localhost:8080/basic/items/5/?status=true
 
+### text와 image 등 하나의 request에 여러 ConetentType을 가진 요청은 스프링에서 어떻게 받아야 할까?
+    
+    이런 ContentType은 multipart/form-data라는 Content-Type을 갖는다. body에는 특정한 구분자를 기준으로 각각의 Content 정보가 들어가고 각각을 part라고 부른다.
+    
+    톰캣은 이런 Http Request를 파싱하고 part별로 분리해서 HttpServletRequest 객체에 넣어준다. 그리고 Controller에서 httpServletRequest.getParts()와 같은 방식으로 part들을 구해올 수 있다. 
+    part는 편리하지만 파일인지 아닌지 구분하기 위해 추가적인 코드를 필요로 한다.
+    
+    스프링은 여기서 좀 더 편리하게 MultipartFile이라는 인터페이스를 지원해준다. Controller에서 이 타입으로 mutipart/form-data 타입의 파일 part를 편리하게 바로 받을 수 있다.
+    이 MultipartFile 또한 Part와 마찬가지로 요청으로 전해진 파일의 이름을 찾거나 바로 파일로 저장하는 등 편리하게 다룰 수 있는 메소드들을 갖고 있다.
+    
+    ---
+    
+    김영한, 스프링 MVC 2편, 파일 업로드 파트
+
 
 ### 세션을 만들고 쿠키를 HttpServletResponse에 포함하지 않았는데 어떻게 쿠키가 자동으로 내려갈까?
     
