@@ -161,3 +161,113 @@ Advice는 단독으로 전달되거나 Pointcut과 묶여서 Advisor의 형태�
 ---
 
 토비의 스프링 6.4
+
+### 빈 후처리기(BeanPostProcessor)란 무엇이고 무슨 문제 때문에 사용할까?
+    
+#중복 #복잡
+
+빈 후처리기는 빈이 생성된 후에 실제로 빈 저장소에 등록되기 전에 빈에 대한 조작을 할 수 있는 빈이다. 객체에 메소드를 호출하거나 다른 객체로 바꿔치기 또한 가능하다.
+
+빈 후처리기를 사용하면 프록시 팩토리빈이 가졌던 2가지 문제를 해결해줄 수 있다.
+
+1. Componant Scan 방식에는 프록시를 사용할 수 없었던 문제.
+2. 프록시 적용을 원하는 클래스마다 설정을 추가로 해주어야 하는 귀찮고 중복되는 문제. xml이라면 프록시 팩토리 빈을 등록해주어야 하고 자바 코드 설정 방식이라면 ProxyFactory를 이용해서 설정해주는 코드를 각 클래스 생성 코드마다 넣어주어야 함.
+
+빈 후처리기를 이용하면 모든 빈들이 일단 만들어진 후 이 빈후처리기로 들어오기 때문에 프록시로 생성하고 싶은 빈들을 골라서 프록시로 대체할 수 있다. 
+
+다음과 같이 사용한다.
+
+```java
+public class PackageLogTraceProxyPostProcessor implements BeanPostProcessor {
+ private final String basePackage;
+ private final Advisor advisor;
+ public PackageLogTraceProxyPostProcessor(String basePackage, Advisor advisor) {
+     this.basePackage = basePackage;
+     this.advisor = advisor;
+ }
+
+ @Override
+ public Object postProcessAfterInitialization(Object bean, String beanName)
+     throws BeansException { //객체 초기화가 일어난 후 처리하는 메소드
+ 
+     //프록시 적용 대상 여부 체크
+     //프록시 적용 대상이 아니면 원본을 그대로 반환
+     String packageName = bean.getClass().getPackageName();
+     if (!packageName.startsWith(basePackage)) {
+         return bean;
+     }
+ 
+    //프록시 대상이면 프록시를 만들어서 반환
+     ProxyFactory proxyFactory = new ProxyFactory(bean);
+     proxyFactory.addAdvisor(advisor);
+     Object proxy = proxyFactory.getProxy();
+     return proxy;
+ }
+} 
+```
+
+참고로 @PostConstruct는 빈후처리기가 처리해준다.
+
+---
+
+  인프런, 김영한, 스프링 핵심 원리 고급편 - 빈 후처리기
+    
+### 스프링이 직접 제공하는 프록시용 빈후처리기는 어떤 식으로 동작할까?
+    
+스프링 부트는 AopAutoConfiguration을 통해 자동으로 AutoProxyCreator라는 프록시용 빈후처리기를 등록한다. 
+
+이 빈후처리기는 등록된 Advisor들을 모두 가져온 후 포인트컷을 이용해서 각각 빈마다 적용할 메소드가 있는지 파악한다. 만약 적용할 메소드가 있다면 이 빈은 프록시로 생성하고 Advisor를 프록시에 등록해준다.
+
+중요한 점은 포인트컷이 부가기능을 적용할 메소드를 선정하는 역할과 동시에 프록시로 만들 클래스를 정하는 역할도 수행한다는 점이다. 
+
+예를 들면 이런 식이다.
+
+```java
+@Bean
+public Advisor advisor3(LogTrace logTrace) {
+ AspectJExpressionPointcut pointcut = new AspectJExpressionPointcut();
+ pointcut.setExpression("execution(* hello.proxy.app..*(..)) && //어떤 클래스에 적용할지
+  !execution(*hello.proxy.app..noLog(..))"); // 어떤 클래스를 뺄지
+ LogTraceAdvice advice = new LogTraceAdvice(logTrace);
+ //advisor = pointcut + advice
+ return new DefaultPointcutAdvisor(pointcut, advice);
+}
+```
+
+또한 여러 포인트컷에 의해 프록시로 만들 빈으로 여러번 선택되더라도 프록시는 하나만 생성된다는 점이다. 그 후 Advisor 리스트에 적용될 Advisor를 추가하게 된다.
+
+---
+
+ 인프런, 김영한, 스프링 핵심 원리 고급편 - 빈 후처리기
+    
+### JDK Proxy vs CGLIB
+    
+둘 다 다이내믹 프록시를 만드는데 사용되는 기술이다.
+
+JDK Proxy는 인터페이스 기반으로 프록시를 만들어주며 CGLIB는 구체 클래스 기반으로 프록시를 만들어준다. 따라서 CGLIB에는 여러가지 제약사항이 있다. 만약 프록시 대상 클래스가 final이거나 기본 생성자가 없다면 프록시를 만들 수 없다.
+    
+### 프록시 팩토리란 무엇이고 무슨 문제를 해결해줄까?
+    
+**문제 상황**
+
+- 프록시를 상황 별로 다른 방식을 통해 만들어야 하고(복잡함) 부가기능을 제공하는 클래스를 중복(귀찮음)으로 만들어야 한다.
+    
+    프록시를 만드는 방법에는 2가지가 있다. 
+    
+    1. 타겟 클래스가 구현한 인터페이스를 implements해서 만드는 법.
+    2. 타겟 클래스를 바로 상속해서 만드는 법.
+    
+    1번 은 JDK Proxy의 방식이고 2번은 CGLIB의 방식이다. 타겟 클래스의 상황에 맞춰서 선택해야 한다.
+    
+    또 1번은 JDK Proxy는 InvocationHandler을, CGLIB은 MethodInterceptor를 부가기능을 더해주는 클래스로 사용한다. 따라서 동일한 부가 기능에 대해 2가지 종류의 클래스를 중복해서 만들어야 한다.
+    
+
+**해결**
+
+- PrxoyFactory로 프록시 만드는 방식을 추상화하고 Advice를 통해 부가기능을 제공하는 방식을 추상화했다.
+    
+    비슷한 기능을 제공하지만 구현 방법이 다르고 인터페이스 또한 다른 상황이다.
+    스프링은 통일된 방식으로 상황에 따라 적절한 방법으로 프록시를 만들기 위해 ProxyFactory라는 클래스로 프록시 만드는 기능을 추상화했다. ProxyFactory는 타겟 클래스 상황에 따라 JDK Proxy 또는 CGLIB을 이용하여 프록시를 만든다.
+    
+    또한 InvocationHandler와 MethodInterceptor 또한 Advice라는 클래스로 추상화했다. 개발자는 Advice에 로직을 한번만 만들어두면 된다. InvocationHandler나 MethodHandler가 내부적으로 Advice를 호출한다.
+      
