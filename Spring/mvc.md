@@ -259,3 +259,29 @@
     ---
     
     인프런, 김영한, 스프링 MVC 2편, 세션 정보와 타임아웃 설정
+
+## 어노테이션
+### @RequestBody vs @ModelAttribute
+- 역할
+    
+    둘 다 넘어온 데이터를 대상 객체로 변환해주기 위해 표시해주는 애노테이션이다. RequestBody는 String, int와 같은 기본 타입도 변환해준다.
+    
+    @RequestBody는 Content-type이 application/json으로 온 데이터를 변환하고, @ModelAttribute는 Content-type이 multipart/form-data 또는 application/x-www-form-urlencoded로 온 데이터를 변환한다.
+    
+
+- 변환 방식
+    
+    @RequestBody의 경우 HttpMessageConverter라는 것을 사용해서 변환을 한다.이 때 실제 HttpMessageConverter는 MappingJackson2MessageConverter라는 것을 사용하는데 이것은 ObjectMapper라는 Jackson 라이브러리의 클래스를 사용한다. ObjectMapper는 Reflection을 이용해서 타겟 클래스를 생성한다. 이 후 Getter나 Setter를 통해 프로퍼티를 확인하고 다시 Reflection을 이용해서 값을 세팅한다. 따라서 Getter만 있다면 Setter가 굳이 없어도 값 세팅을 할 수 있다. 하지만 기본 생성자로 일단 생성해야 하므로 기본 생성자는 꼭 필요하다.
+    
+    반면 ModelAttribute는 HttpMessageConverter를 사용하지는 않는다. ModelAttribute는 ModelAttributeMethodProcessor가 처리한다. @RequestBody처럼 대상 클래스 생성은 동일하게 Reflection으로 한다. 이 때 필요한 값을 세팅하는 생성자가 정의되어 있다면 이 생성자를 이용해서 생성과 동시에 값을 세팅하고, 없다면 기본 생성자로 생성한 후 setter를 이용해 값을 세팅한다. 따라서 값을 세팅하는 생성자나 Setter가 정의되어 있어야지 옳바르게 값을 할당한다.
+        
+### @RequestParam vs @RequestPart
+    
+둘 다 multipart/form-data로 전송된 데이터를 받을 수 있지만, 데이터 타입이 String이나 MultipartFile/ Part가 아닐 때 RequestParam은 등록된 Converter를 그대로 사용하여 변환이 제대로 되지 않지만 @RequestPart는 'Content-type'을 고려하는 HttpMessageConverter를 사용한다.
+
+따라서 multipart/form-data로 복잡한 json이나 xml 형태의 데이터가 올 때는 RequestPart를 사용하면 HttpMessageConverter가 알아서 변환을 해주고,
+그게 아니라 RequestParam을 사용하려면 직접 Content-type에 따라 변환해주는 Converter를 만들어주어야 한다.
+
+---
+
+스프링 API 문서
