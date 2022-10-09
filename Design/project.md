@@ -591,3 +591,53 @@
     		return ImageUrlUtil.generateUrl(ServiceType.Product, mainImageName);
     	}
     }
+
+### 상품 수정할 때 전시용 상품과 실제 상품은 함께 수정된다. 이 때 실제 상품은 테이블 내에 존재하면 insert, 존재하지 않으면 update를 해야하는데 sql로 어떻게 처리할까?
+    
+    2가지 방식이 있다.
+    
+    1. INSERT … ON DUPLICATE KEY UPDATE
+    
+    INSERT INTO TABLE (id, name, age) VALUES(1, "A", 19) as user
+        ON DUPLICATE KEY UPDATE name = user.name , age = ueser.age;
+    
+    - 동작 방식
+        
+        Primary Key 또는 Unique Index를 통해 중복된 row를 판단하고 중복된 row가 있다면 원하는 부분만 업데이트하고 그렇지 않다면 삽입한다.
+        
+        이 때 중복된 row가 여러개라면 ex (하나는 primary key에서 중복, 하나는 다른 uniqeu key에서 중복) 둘 중 하나만 업데이트 된다.
+        
+        ‘따라서 id가 5번인 애가 있으면 update하고 없으면 집어넣어야지’라는 생가으로 이 쿼리를 썼을 때 5번 id를 가진 row가 없는데도 불구하고
+        이 쿼리의 다른 unique 칼럼에서 중복이 발생한다면 row가 새로 insert되지 않고, 중복이 발생된 row가 뜬금없이 update되므로 주의해야 한다.
+        
+    1. REPLACE INTO
+    
+    REPLACE INTO table (id, name, age) VALUES(1, "A", 19);
+    
+    - 동작 방식
+        
+        Primary Key 또는 Unique Index를 통해 중복된 row를 판단하고 중복된 row가 있다면 삭제하고 이 값을 대신 집어넣는다. 
+        
+        Unique Index가 겹쳐도 삭제 후 집어넣으니 주의해야 한다. 또한 넣으려는 row가 여러 row들과 Unique Index에 대해서 겹친다면 여러 Row가 삭제되니 주의해야 한다.
+        
+        필요한 모든 데이터가 다 존재해야 한다. 그렇지 않은 필드는 기본값으로 할당될 것이다.
+        
+        삭제 후 집어넣는 방식이기 때문에 다른 테이블에서 이 테이블에 Primary Key를 외래키로 갖고 있고 삭제 규칙이 SET NULL로 설정되어 있지 않다면 쿼리가 실패한다.
+        
+    
+    1번과 2번 둘 다 테이블에 primary key외에 unique 칼럼이 존재할 시 예상하지 못한 update 또는 삭제가 발생할 수 있으므로 주의해야 한다.
+    
+    하지만 현재 Product 테이블에는 id외에 unique 칼럼은 존재하지 않으므로 이 부분은 무시해도 된다. 
+    
+    한 편 Product 테이블은 여러 테이블과 관계를 맺고 있고, 대부분 삭제 조건이 RESTRICT로 설정되어 있기 때문에,
+    삭제하고자 하는 row를 참조하는 테이블이 하나로 존재할시 쿼리가 실패하게 된다.
+    
+    따라서 2번 방식이 알맞다고 생각된다.
+    
+    ---
+    
+    [https://dev.mysql.com/doc/refman/8.0/en/insert-on-duplicate.html](https://dev.mysql.com/doc/refman/8.0/en/insert-on-duplicate.html)
+    
+    [https://dev.mysql.com/doc/refman/8.0/en/replace.html](https://dev.mysql.com/doc/refman/8.0/en/replace.html)
+    
+    [https://stackoverflow.com/questions/4205181/insert-into-a-mysql-table-or-update-if-exists](https://stackoverflow.com/questions/4205181/insert-into-a-mysql-table-or-update-if-exists)
