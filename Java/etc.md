@@ -40,3 +40,24 @@ Universal Unique Identifier의 약자로 전세계적으로 유일한 값이라�
 ---
 
 [https://en.wikipedia.org/wiki/Universally_unique_identifier](https://en.wikipedia.org/wiki/Universally_unique_identifier)
+
+### ISO 8601이란 무엇이고 무슨 문제를 해결해줄까?
+    
+    날짜와 시간 관련 데이터를 주고 받을 때 사용되는 국제 표준이다. 여러 나라나 시스템이 데이터를 주고 받을 때 서로 통일되지 않아 오류가 나는 것은 방지하기 위해 제정됐다.
+    
+    이 표준은 ISO라 불리고 현재 최신 버전은 ISO 8601이다.
+    
+    형태
+    
+    2017-03-16T17:40:00+09:00
+    
+    - 날짜 : 년-월-일
+    - T : 날짜 뒤에 시간이 오는것을 표시해주는 문자
+    - 시간 : 시:분:초의 형태로 나와있으며 프로그래밍 언어에 따라서 초 뒤에 소수점 형태로 milliseconds가 표시
+    - Timezone Offset : 시간 뒤에 ±시간:분의 형태로 나와있으며 UTC기준 시로부터 얼마만큼 차이가 있는지를 나타냅니다.
+       현재 위의 예시는 한국시간을 나타내며 UTC기준 시로부터 9시간 +된 시간임을 나타낸다.
+    - 위 형태의 시간의 UTC시간은 2017-03-16T08:40:00Z이다. 뒤에 Z가 붙으면 UTC이고 +나 -가 붙으면 ISO 형식의 시간이다.
+    
+    ---
+    
+    [https://java119.tistory.com/24](https://java119.tistory.com/24)
