@@ -155,6 +155,59 @@
     
     Java 11 API document - HashMap 설멍부분
 
+### ConcurrentHashMap은 무엇이고 어떤 문제를 해결해줄까?
+    
+    일반적인 HashMap은 Thread Safe하지 않다. 따라서 다음과 같은 상황에서 문제가 발생할 수 있다.
+    
+    1. Null 확인 후 집어넣기, read - modify - write
+        
+        // Null 확인 후 집어넣기
+        HashMap<String, Object> something = new HashMap<>();
+        
+        if(something.get("a") == null){
+        	Object object = new Object();
+        	something.put("a", object);
+        	object.doSomething();
+        	...
+        }
+        
+        // read - modify - write
+        HashMap<String, Integer> something = new HashMap<>();
+        
+        int a = something.get("a");
+        something.put("a", a + 1);
+        
+        일반적인 HashMap이라면 멀티 쓰레드 상황에서는 위 코드는 race condition으로 인해 문제가 발생할 확률이 높다. 
+        
+        하지만 ConcurrentHashMap을 사용할 경우 putIfAbsent()나 computeIfPresent()와 같이 자주 쓰이는 복합 
+        연산을 단일 연산화한 메소드를 동기화 된 방식으로 사용할 수 있기 때문에 race condition으로부터 자유롭다.
+        
+    2. 전체 Map을 순회하면서 값을 다루는 상황
+        
+        HashMap<String, Object> something;
+        
+        for(Map.Entry<String, String> entry : something.keySet()){
+        ...
+        }
+        
+        만일 위 상황에서 다른 쓰레드가 Map에 있는 값을 수정할 경우, ConcurrentModificationException이 일어난다. 
+        
+        그 이유는 값 수정으로 인해 잘못된 결과가 나올 수 있기 때문이다.
+        
+        하지만 ConcurrentHashMap을 사용하면 Iterator을 사용한 시점에 Map 상태의 스냅샷을 찍어놓고 진행하기 때문에
+        위 예외로부터 자유롭다.
+        
+### ConcurrentHashMap은 내부적으로 어떻게 동기화를 할까?
+    
+    Lock Striping 기법을 사용한다. 여러개의 자원을 두고 하나의 락을 걸던 것을 각각의 자원에 대해 각각의 락을 걸게끔
+    하는 것을 락 분할이라고 한다.
+    
+    Lock Striping 기법은 락 분할을 더 쪼갠 것으로, 하나의 자원을 여러개의 락으로 분할하여 접근하는 것을 말한다.
+    
+    예를 들어 ConcurrentHashMap에서는 각 버킷에 락을 건다. 
+    따라서 서로 다른 버킷에 접근하는 쓰레드들은 자유롭게 맵에 접근 할 수 있어 
+    HashTable이나 SynchronizedHashMap보다 성능이 뛰어나다.
+
 # Set
 ### TreeSet이란? 필요한 이유?
     
