@@ -341,3 +341,21 @@
     ---
     
     **[네이버 지식백과]** [로킹 기법의 개념](https://terms.naver.com/entry.naver?docId=3431286) (데이터베이스 개론, 2013. 6. 30., 김연희)
+
+<details>
+<summary>MVCC란 무엇이고 왜 사용할까?</summary>
+<br>
+Multi Version Concurrency Control의 약자로 하나의 row에 대해 여러 버전을 저장해서, 잠금없는 읽기는 제공한다.
+
+Read Committed 이상의 Isolaton Level에서 하나의 트랜잭션이 특정 row에 업데이트를 하고 아직 commit하지 않은 상황이라고 해보자.
+
+이 때 MVCC를 사용하지 않는 DBMS는 커밋되지 않은 데이터를 읽지 않기 위해서 공용락을 걸고 SELECT해야 하는 규칙을 걸 것이다. 
+
+그래야 쓰기락에 막혀서 업데이트 중인 데이터를 읽지 않게 된다. 
+
+하지만 MVCC를 쓰게 된다면 이전 버전의 데이터가 다른 공간에 저장되어 있기 때문에 이것을 읽으면 된다.
+
+즉 잠금없는 읽기가 가능해진 것이다.
+
+MVCC를 통해 쓰기와 읽기가 공존할 수 있게 되고, 성능도 좋아지며, 데드락의 가능성도 줄어든다.
+</details>
