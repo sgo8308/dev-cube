@@ -56,3 +56,25 @@ hypervisor를 사용하면 호스트의 리소스를 더 효율적으로 사용�
 ---
 
 [https://en.wikipedia.org/wiki/Hypervisor](https://en.wikipedia.org/wiki/Hypervisor)
+
+<details>
+<summary>vcpu란?</summary>
+<br>
+vcpu란 가상의 CPU라는 의미로 쓰레드와 비슷하게 생각할 수 있다. 
+
+하나의 컴퓨터에서 hypervisor에 의해 여러 가상 머신이 실행될 수 있는데, hypervisor가 이 가상 머신에 실제 CPU의 time을 얼만큼 배분할건지, 또 실제 CPU의 성능은 어떤지에 따라 vCPU의 성능이 결정된다.
+
+마치 프로세스가 운영체제에 의해 CPU 스케쥴링 되는 것처럼, 가상 머신이 hypervisor에 의해 CPU 스케쥴링 된다.
+
+만약 vCPU와 CPU의 비율이 5:1라고 한다면, 하나의 실제 CPU에 5개의 vCPU가 할당되는 셈이다.
+
+5개의 vCPU를 사용한다고 할 때 5개의 쓰레드를 병렬적으로 실행할 수 있다고 할 수는 없다. 5개의 vCPU가 5개의 실제 코어에 대응될 수도 있고 아닐 수도 있기 때문이다.
+
+---
+
+[https://download3.vmware.com/vcat/vmw-vcloud-architecture-toolkit-spv1-webworks/index.html#page/Core Platform/Architecting a vSphere Compute Platform/Architecting a vSphere Compute Platform.1.019.html](https://download3.vmware.com/vcat/vmw-vcloud-architecture-toolkit-spv1-webworks/index.html#page/Core%20Platform/Architecting%20a%20vSphere%20Compute%20Platform/Architecting%20a%20vSphere%20Compute%20Platform.1.019.html)
+
+[https://www.howtogeek.com/devops/what-is-a-vcpu-and-how-much-performance-is-it/](https://www.howtogeek.com/devops/what-is-a-vcpu-and-how-much-performance-is-it/)
+
+[https://www.datacenters.com/news/what-is-a-vcpu-and-how-do-you-calculate-vcpu-to-cpu](https://www.datacenters.com/news/what-is-a-vcpu-and-how-do-you-calculate-vcpu-to-cpu)
+</details>
