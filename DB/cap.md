@@ -1,4 +1,16 @@
 <details>
+<summary>CAP이론이란?</summary>
+<br>
+분산 환경에서 CAP 중에 2가지는 만족할 수 있지만 3가지를 모두 만족할 수는 없다는 이론이다.
+DB가 2개로 이루어진 분산 DB 환경이라고 해보자.
+
+C: Consistency로 DB에 데이터를 요청하면 언제나 두 DB 중 마지막에 업데이트된 값을 리턴받는 다는 것을 의미한다.
+A: Availability로 DB에 데이터를 요청하면 언제나 빠른 시간 안에 응답을 받는다는 것을 의미한다.
+P: Partition tolerance로 네트워크 장애가 발생하더라도 DB가 정상적으로 동작한다는 것을 의미한다.
+---
+https://hamait.tistory.com/197
+</details>
+<details>
 <summary>Eventual Consitency란?</summary>
 <br>    
 두 시스템이 서로 동기화가 필요한 분산 시스템 환경이 있다고 하자. 
